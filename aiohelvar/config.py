@@ -1,8 +1,10 @@
 class Config:
-    """Represent Helvar config.
-    """
+    """Represent Helvar config."""
 
-    async def __init__(self, router,):
+    async def __init__(
+        self,
+        router,
+    ):
         self.router = router
         await self.update()
 

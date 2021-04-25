@@ -1,5 +1,3 @@
-
-
 things_to_send = []
 
 # from .config import Config

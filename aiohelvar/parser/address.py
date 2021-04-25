@@ -18,6 +18,7 @@ class HelvarAddress:
     router: 1
 
     """
+
     def __init__(self, cluster, router, subnet=None, device=None):
         self.cluster = cluster
         self.router = router
@@ -44,7 +45,7 @@ class HelvarAddress:
 
     def __eq__(self, other):
 
-        for a in ('cluster', 'router', 'subnet', 'device'):
+        for a in ("cluster", "router", "subnet", "device"):
 
             if getattr(self, a) is not None:
                 if getattr(other, a) is None:
