@@ -29,3 +29,6 @@ jobs:
       - name: Check formatting with black
         run: |
           black aiohelvar --check
+      - name: Run unit tests
+        run: |
+          pytest aiohelvar/parser
