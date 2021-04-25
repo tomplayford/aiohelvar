@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": ".venv/bin/python"
+    "python.pythonPath": ".venv/bin/python",
+    "cornflakes.linter.executablePath": "/usr/local/bin/flake8"
+
 }

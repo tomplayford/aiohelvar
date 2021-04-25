@@ -17,15 +17,14 @@ class HelvarAddress:
     cluster: 0
     router: 1
 
-    """    
+    """
     def __init__(self, cluster, router, subnet=None, device=None):
         self.cluster = cluster
         self.router = router
         self.subnet = subnet
         self.device = device
 
-
-    def __str__(self, separator="."): 
+    def __str__(self, separator="."):
         base = f"@{self.cluster}{separator}{self.router}"
         if self.subnet:
             base = f"{base}{separator}{self.subnet}"
@@ -35,7 +34,7 @@ class HelvarAddress:
 
     def bus_type(self):
 
-        if self.subnet in (1,2):
+        if self.subnet in (1, 2):
             return "DALI"
         if self.subnet == 3:
             return "S-DIM"

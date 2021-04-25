@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CommandType(Enum):
 
     # Queries
@@ -18,9 +19,8 @@ class CommandType(Enum):
     QUERY_SCENE_NAMES = (166, "Query all scene names in group.")
 
     # Commands
-    DIRECT_LEVEL_DEVICE = (14,"Direct Level, Device")
+    DIRECT_LEVEL_DEVICE = (14, "Direct Level, Device")
     RECALL_SCENE = (11, "Recall Scene")
-
 
     def __init__(self, code, description):
         self.code = code
@@ -46,7 +46,7 @@ class CommandParameterType(Enum):
     LEVEL = ("L")
     PROPORTION = ("P")
     DISPLAY_SCREEN = ("D")
-    SEQUENCE_NUMBER  =("Q")
+    SEQUENCE_NUMBER = ("Q")
     TIME = ("T")
     ACK = ("A")
     LATITUDE = ("L")
