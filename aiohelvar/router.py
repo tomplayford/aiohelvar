@@ -37,7 +37,8 @@ class Router:
         return self._router_id
 
     async def initialize(self):
-        result = await self.request("get", "")
+        pass
+        # result = await self.request("get", "")
 
         # self.config = Config(result["config"], self.request)
         # self.groups = Groups(result["groups"], self.request)
@@ -67,4 +68,5 @@ def _raise_on_error(data):
         data = data[0]
 
     if isinstance(data, dict) and "error" in data:
-        raise_error(data["error"])
+        pass
+    # raise_error(data["error"])
