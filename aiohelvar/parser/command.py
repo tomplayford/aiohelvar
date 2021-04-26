@@ -37,7 +37,12 @@ class CommandMessageType(Enum):
 
 
 class Command:
-    def __init__(self, command_type: CommandType, command_parameter: CommandParameter, command_message_type: CommandMessageType = CommandMessageType.COMMAND):
+    def __init__(
+        self,
+        command_type: CommandType,
+        command_parameter: CommandParameter,
+        command_message_type: CommandMessageType = CommandMessageType.COMMAND,
+    ):
         self.command_type = command_type
         self.command_parameter = command_parameter
         self.command_message_type = command_message_type

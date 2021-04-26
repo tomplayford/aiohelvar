@@ -24,9 +24,6 @@ class CommandParameterType(Enum):
 
 
 class CommandParameter:
-
     def __init__(self, command_parameter_type: CommandParameterType, argument: str):
         self.command_parameter_type = command_parameter_type
         self.argument = argument
-
-
