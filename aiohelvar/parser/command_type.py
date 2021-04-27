@@ -22,9 +22,12 @@ class CommandType(Enum):
     DIRECT_LEVEL_DEVICE = (14, "Direct Level, Device")
     RECALL_SCENE = (11, "Recall Scene")
 
-    def __init__(self, code, description):
-        self.code = code
+    def __init__(self, command_id, description):
+        self.command_id = command_id
         self.description = description
+
+    def __str__(self):
+        return f"{self.command_id}"
 
 
 class MessageType(Enum):
@@ -33,6 +36,9 @@ class MessageType(Enum):
     INTERNAL_COMMAND = "<"
     REPLY = "?"
     ERROR = "!"
+
+    def __str__(self):
+        return self.value
 
 
 class CommandParameterType(Enum):
@@ -55,3 +61,6 @@ class CommandParameterType(Enum):
     DAYLIGHT_SAVING_TIME = "Y"
     CONSTANT_LIGHT_SCENE = "K"
     FORCE_STORE_SCENE = "O"
+
+    def __str__(self):
+        return self.value

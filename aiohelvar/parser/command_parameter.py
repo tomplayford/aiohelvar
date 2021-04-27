@@ -22,8 +22,15 @@ class CommandParameterType(Enum):
     CONSTANT_LIGHT_SCENE = "K"
     FORCE_STORE_SCENE = "O"
 
+    def __str__(self):
+        return self.value
+
 
 class CommandParameter:
     def __init__(self, command_parameter_type: CommandParameterType, argument: str):
         self.command_parameter_type = command_parameter_type
         self.argument = argument
+
+    def __str__(self):
+        return f"{self.command_parameter_type}:{self.argument}"
+
