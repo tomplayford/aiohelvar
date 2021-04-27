@@ -1,5 +1,6 @@
 from enum import Enum
-from aiohelvar.parser.command_parameter import CommandParameter
+from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
+from aiohelvar.parser.address import HelvarAddress
 
 default_helvarNet_version = "2"
 default_helvar_termination_char = "#"
@@ -42,7 +43,26 @@ class Command:
         command_type: CommandType,
         command_parameter: CommandParameter,
         command_message_type: CommandMessageType = CommandMessageType.COMMAND,
+        command_address: HelvarAddress = None,
     ):
         self.command_type = command_type
         self.command_parameter = command_parameter
         self.command_message_type = command_message_type
+        self.command_address = command_address
+
+    def build_base_parameters(self):
+        return [
+            CommandParameter(CommandType.VERSION, default_helvarNet_version),
+            CommandParameter(CommandType.COMMAND, self.command_type.command_id),
+        ]
+
+    def __str__(self):
+
+        parameters = [self.command_message_type]
+
+        parameters += self.has_base_parameters()
+
+        if self.command_address is not None:
+            parameters.append(self.command_address)
+
+        return ",".join(parameters) + default_helvar_termination_char
