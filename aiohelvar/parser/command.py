@@ -2,6 +2,7 @@ from aiohelvar.parser.command_type import CommandType, MessageType
 from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
 from aiohelvar.parser.address import HelvarAddress
 from typing import List
+
 default_helvarNet_version = "2"
 default_helvar_termination_char = "#"
 

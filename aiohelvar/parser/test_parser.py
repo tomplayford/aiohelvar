@@ -8,10 +8,7 @@ from aiohelvar.parser.address import HelvarAddress
 
 def test_command_parseing_simple():
 
-    command_strings = [
-        ">V:2,C:101,G:2#",
-        ">V:2,C:101,G:2,S:3#"
-    ]
+    command_strings = [">V:2,C:101,G:2#", ">V:2,C:101,G:2,S:3#"]
 
     for command_string in command_strings:
         parser = CommandParser()
@@ -29,6 +26,7 @@ def test_basic_command_construction():
     )
 
     assert str(command) == ">V:2,C:101,G:2#"
+
 
 # Address tests
 

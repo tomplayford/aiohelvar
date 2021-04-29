@@ -1,5 +1,6 @@
 class Error(Exception):
     """Base class for exceptions in this module."""
+
     pass
 
 
@@ -17,6 +18,6 @@ class ParserError(Error):
 
 
 class UnrecognizedCommand(ParserError):
-    """Exception raised when the parser encounters a command it does not recognize
-    """
+    """Exception raised when the parser encounters a command it does not recognize"""
+
     pass
