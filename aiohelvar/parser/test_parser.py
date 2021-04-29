@@ -1,20 +1,37 @@
+from aiohelvar.parser.parser import CommandParser
 from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
 from aiohelvar.parser.command import Command, CommandType
 from aiohelvar.parser.address import HelvarAddress
 
-
 # Command tests
+
+
+def test_command_parseing_simple():
+
+    command_strings = [
+        ">V:2,C:101,G:2#",
+        ">V:2,C:101,G:2,S:3#"
+    ]
+
+    for command_string in command_strings:
+        parser = CommandParser()
+        command = parser.parse_command(command_string)
+
+        assert isinstance(command, Command) is True
+        assert command != command_string
+        assert str(command) == command_string
+
 
 def test_basic_command_construction():
 
     command = Command(
-        CommandType.QUERY_CLUSTERS,
-        CommandParameter(CommandParameterType.GROUP, "2")
+        CommandType.QUERY_CLUSTERS, [CommandParameter(CommandParameterType.GROUP, "2")]
     )
 
     assert str(command) == ">V:2,C:101,G:2#"
 
 # Address tests
+
 
 def test_helvar_address_equality():
 

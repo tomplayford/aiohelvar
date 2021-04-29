@@ -33,4 +33,3 @@ class CommandParameter:
 
     def __str__(self):
         return f"{self.command_parameter_type}:{self.argument}"
-

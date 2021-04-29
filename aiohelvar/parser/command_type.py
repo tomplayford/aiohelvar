@@ -29,6 +29,13 @@ class CommandType(Enum):
     def __str__(self):
         return f"{self.command_id}"
 
+    @classmethod
+    def get_by_command_id(cls, command_id):
+        for member in cls:
+            if member.value[0] == command_id:
+                return member
+        raise KeyError
+
 
 class MessageType(Enum):
 
