@@ -1,12 +1,13 @@
-from aiohelvar.parser.command_type import CommandType, MessageType
-from aiohelvar.parser.address import HelvarAddress
-from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
-from aiohelvar.parser.command import Command
 from aiohelvar.exceptions import UnrecognizedCommand
+from .command_type import CommandType, MessageType
+from .address import HelvarAddress
+from .command_parameter import CommandParameter, CommandParameterType
+from .command import Command
+
 import re
 
 
-command_regex = "^(?P<type>[<>?!])V:(?P<version>\\d),C:(?P<command>\\d+),?(?P<params>[^=@#]+)?(?P<address>@[^=#]+)?(=(?P<result>[^=#]+))?#?$"
+command_regex = "^(?P<type>[<>?!])V\:(?P<version>\d),C\:(?P<command>\d+),?(?P<params>[^=@#]+)?(?P<address>@[^=#]+)?(=(?P<result>[^=#]+))?#?$"
 
 
 class CommandParser:
@@ -14,6 +15,8 @@ class CommandParser:
     raw_command = None
 
     def parse_command(self, input):
+
+        input = input.decode()
         r = re.compile(command_regex)
         match = r.fullmatch(input)
 

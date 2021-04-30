@@ -1,4 +1,8 @@
-things_to_send = []
+from .exceptions import ParserError
+from .parser.parser import CommandParser
+import asyncio
+
+LINE_ENDING = b"#"
 
 # from .config import Config
 # from .groups import Groups
@@ -22,6 +26,9 @@ class Router:
         self.scenes = None
         self.sensors = None
 
+        self.commands_to_send = []
+        self.command_to_send = asyncio.Event()
+
         # self.capabilities = None
         # self.rules = None
         # self.schedules = None
@@ -34,8 +41,53 @@ class Router:
 
         return self._router_id
 
+    async def connect(self):
+        print("Connecting...")
+        reader, writer = await asyncio.open_connection(self.host, self.port)
+
+        asyncio.create_task(self.stream_reader(reader))
+        asyncio.create_task(self.stream_writer(reader, writer))
+
+    async def stream_reader(self, reader):
+        # an echo server
+        print("Connected.")
+        parser = CommandParser()
+
+        while True:
+            line = await reader.readuntil(LINE_ENDING)
+            if line is not None:
+
+                print(f"We've received the following: {line}")
+                try:
+                    command = parser.parse_command(line)
+                except ParserError as e:
+                    print(e)
+                else:
+                    print(f"Found the following command: {command}")
+            await asyncio.sleep(0.1)
+
+    async def stream_writer(self, reader, writer):
+
+        while True:
+            await self.command_to_send.wait()
+            if len(self.commands_to_send) > 0:
+                thing = self.commands_to_send.pop()
+                print(f"found {thing} to send. Sending...")
+                writer.write(thing)
+                await writer.drain()
+                print("Sent!")
+            else:
+                self.command_to_send.clear()
+
     async def initialize(self):
-        pass
+
+        # Attempt Connection
+
+        await self.connect()
+
+        await self.send_command(b">V:2,C:185#")
+        await self.send_command(b">V:2,C:165#")
+
         # result = await self.request("get", "")
 
         # self.config = Config(result["config"], self.request)
@@ -46,25 +98,6 @@ class Router:
         # if "sensors" in result:
         #     self.sensors = Sensors(result["sensors"], self.request)
 
-    async def request(self, method, path, json=None, auth=True):
-        """Make a request to the API."""
-        url = "http://{}/api/".format(self.host)
-        if auth:
-            url += "{}/".format(self.username)
-        url += path
-
-        async with self.websession.request(method, url, json=json) as res:
-            res.raise_for_status()
-            data = await res.json()
-            _raise_on_error(data)
-            return data
-
-
-def _raise_on_error(data):
-    """Check response for error message."""
-    if isinstance(data, list):
-        data = data[0]
-
-    if isinstance(data, dict) and "error" in data:
-        pass
-    # raise_error(data["error"])
+    async def send_command(self, command):
+        self.commands_to_send.append(command)
+        self.command_to_send.set()
