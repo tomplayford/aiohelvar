@@ -18,7 +18,7 @@ class Command:
     def __init__(
         self,
         command_type: CommandType,
-        command_parameters: List[CommandParameter],
+        command_parameters: List[CommandParameter] = [],
         command_message_type: MessageType = MessageType.COMMAND,
         command_address: HelvarAddress = None,
     ):

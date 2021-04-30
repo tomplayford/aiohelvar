@@ -1,3 +1,5 @@
+from aiohelvar.parser.command_type import CommandType
+from aiohelvar.parser.command import Command
 from .exceptions import ParserError
 from .parser.parser import CommandParser
 import asyncio
@@ -85,8 +87,8 @@ class Router:
 
         await self.connect()
 
-        await self.send_command(b">V:2,C:185#")
-        await self.send_command(b">V:2,C:165#")
+        await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
+        await self.send_command(Command(CommandType.QUERY_GROUPS))
 
         # result = await self.request("get", "")
 
@@ -98,6 +100,9 @@ class Router:
         # if "sensors" in result:
         #     self.sensors = Sensors(result["sensors"], self.request)
 
-    async def send_command(self, command):
-        self.commands_to_send.append(command)
+    async def send_command(self, command: Command):
+        await self.send_string(str(command))
+
+    async def send_string(self, string: str):
+        self.commands_to_send.append(bytes(string, 'utf-8'))
         self.command_to_send.set()
