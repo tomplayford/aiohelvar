@@ -21,11 +21,13 @@ class Command:
         command_parameters: List[CommandParameter] = [],
         command_message_type: MessageType = MessageType.COMMAND,
         command_address: HelvarAddress = None,
+        command_result: str = None
     ):
         self.command_type = command_type
         self.command_parameters = command_parameters
         self.command_message_type = command_message_type
         self.command_address = command_address
+        self.result = command_result
 
     def build_base_parameters(self):
         return [
@@ -45,4 +47,8 @@ class Command:
             parameters.append(self.command_address)
 
         main_message = ",".join([str(p) for p in parameters])
+
+        if self.result:
+            main_message = f"{main_message}={self.result}"
+
         return f"{self.command_message_type}{main_message}{default_helvar_termination_char}"
