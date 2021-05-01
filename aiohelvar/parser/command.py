@@ -3,7 +3,7 @@ from .command_parameter import CommandParameter, CommandParameterType
 from .address import HelvarAddress
 from typing import List
 
-default_helvarNet_version = "2"
+default_helvarNet_version = "1"
 default_helvar_termination_char = "#"
 
 

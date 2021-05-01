@@ -6,7 +6,7 @@ class CommandType(Enum):
     # Queries
     QUERY_CLUSTERS = (101, "Query Clusters.")
     QUERY_GROUP_DESCRIPTION = (105, "Query group description.")
-    QUERY_DESCRIPTION_DEVICE = (106, "Query device description.")
+    QUERY_DEVICE_DESCRIPTION = (106, "Query device description.")
     QUERY_DEVICE_TYPES_AND_ADDRESSES = (100, "Query Device Types and Addresses")
     QUERY_DEVICE_STATE = (110, "Query Device State")
     QUERY_DEVICE_LOAD_LEVEL = (152, "Query Device Load Level")
@@ -17,6 +17,8 @@ class CommandType(Enum):
     QUERY_GROUP = (164, "Query devices in group.")
     QUERY_GROUPS = (165, "Query all groups.")
     QUERY_SCENE_NAMES = (166, "Query all scene names in group.")
+    QUERY_ROUTER_VERSION = (190, "Query the router software version.")
+    QUERY_HELVARNET_VERSION = (191, "Query the HelvarNet software version.")
 
     # Commands
     DIRECT_LEVEL_DEVICE = (14, "Direct Level, Device")

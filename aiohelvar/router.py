@@ -1,3 +1,5 @@
+from aiohelvar.parser.address import HelvarAddress
+from aiohelvar.devices import create_devices_from_command
 from asyncio import exceptions
 from .parser.command_type import CommandType
 from .parser.command import Command
@@ -12,10 +14,10 @@ COMMAND_TERMINATOR = b"#"
 # can be waiting some time. Setting this to a somewhat absurd 30 seconds.
 COMMAND_RESPONSE_TIMEOUT = 30
 
-KEEP_ALIVE_PERIOD = 10
+KEEP_ALIVE_PERIOD = 120
 
 # from .config import Config
-# from .groups import Groups
+from .groups import Group, create_groups_from_command
 # from .lights import Lights
 # from .scenes import Scenes
 # from .sensors import Sensors
@@ -25,10 +27,11 @@ KEEP_ALIVE_PERIOD = 10
 class Router:
     """Control a Helvar Route."""
 
-    def __init__(self, host, port, router_id=None):
+    def __init__(self, host, port, cluster_id = 0, router_id = 1):
         self.host = host
         self.port = port
-        self._router_id = router_id
+        self.cluster_id = cluster_id
+        self.router_id = router_id
 
         self.config = None
         self.groups = None
@@ -56,8 +59,12 @@ class Router:
 
     async def connect(self):
         print("Connecting...")
-        self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
-
+        
+        try:
+            self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
+        except ConnectionError as e:
+            self.logger.error("Connection error while connecting to router", e)
+            raise 
         self._stream_reader_task = asyncio.create_task(
             self._stream_reader(self._reader)
         )
@@ -86,7 +93,7 @@ class Router:
 
         self._writer.close()
         await self._writer.wait_closed()
-        print("Disconnected")
+        print("Disconnected.")
 
     async def _keep_alive(self):
         """Keep the TCP connection alive. This'll also clean up any stale command futures."""
@@ -122,7 +129,9 @@ class Router:
                 try:
                     command = parser.parse_command(line)
                 except ParserError as e:
-                    print(e)
+                    print(f"Exception handling line: {e}")
+                except Exception as e:
+                    raise e
                 else:
                     print(f"Found the following command: {command}")
                     await self.command_received.acquire()
@@ -148,24 +157,38 @@ class Router:
 
         # Attempt Connection
         await self.connect()
+ 
+        # Get Groups 
+        await self.get_groups()
 
-        first_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
-        second_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
-        third_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
-        forth_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
+        # Get Devices
+        await self.get_devices()
 
-        first_command.add_done_callback(
-            lambda one: print(f"1st command got reply: {one.result()}")
-        )
-        second_command.add_done_callback(
-            lambda one: print(f"2nd command got reply {one.result()}")
-        )
-        third_command.add_done_callback(
-            lambda one: print(f"3rd command got reply {one.result()}")
-        )
-        forth_command.add_done_callback(
-            lambda one: print(f"4th command got reply {one.result()}")
-        )
+
+        # Get Clusters
+        # await self.get_clusters()
+
+        # Get Scenes 
+        # await self.get_scenes()
+
+
+        # first_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
+        # second_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
+        # third_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
+        # forth_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
+
+        # first_command.add_done_callback(
+        #     lambda one: print(f"1st command got reply: {one.result()}")
+        # )
+        # second_command.add_done_callback(
+        #     lambda one: print(f"2nd command got reply {one.result()}")
+        # )
+        # third_command.add_done_callback(
+        #     lambda one: print(f"3rd command got reply {one.result()}")
+        # )
+        # forth_command.add_done_callback(
+        #     lambda one: print(f"4th command got reply {one.result()}")
+        # )
 
         # result = await self.request("get", "")
 
@@ -175,6 +198,52 @@ class Router:
         # if "scenes" in result:
         # if "sensors" in result:
         #     self.sensors = Sensors(result["sensors"], self.request)
+
+    async def get_groups(self):
+        response = await self.send_command(Command(CommandType.QUERY_GROUPS))
+
+        await response
+
+        self.groups = await create_groups_from_command(self, response.result())
+
+    async def get_devices(self):
+        
+        response_subnet_1 = await self.send_command(
+            Command(
+                CommandType.QUERY_DEVICE_TYPES_AND_ADDRESSES,
+                command_address=HelvarAddress(self.cluster_id, self.router_id, 1)))
+
+        # response_subnet_2 = await self.send_command(
+        #     Command(
+        #         CommandType.QUERY_DEVICE_TYPES_AND_ADDRESSES,
+        #         command_address=HelvarAddress(self.cluster_id, self.router_id, 2)))
+
+        await response_subnet_1
+        # await response_subnet_2
+
+        # commands = [response_subnet_1.result(), response_subnet_2.result()]
+
+        commands = [response_subnet_1.result(),]
+
+        self.devices = await create_devices_from_command(self, commands)
+
+        for device in self.devices:
+            print(device)
+
+    async def get_scenes(self):
+        response = await self.send_command(Command(CommandType.QUERY_SCENE_NAMES))
+
+        await response
+
+        # self.groups = await create_groups_from_command(self, response.result())
+
+    # async def get_clusters(self): 
+    #     response = await self.send_command(Command(CommandType.QUERY_ROUTERS))
+
+    #     await response
+
+    #     print(response.result())
+
 
     async def _send_command_task(self, command: Command):
 
@@ -212,7 +281,7 @@ class Router:
 
         return response
 
-    async def send_command(self, command: Command):
+    async def send_command(self, command: Command) -> asyncio.Task:
         """
         Send command, return a future that'll return when we get a response back.
         We don't have request identifiers, so we have to use basic FIFO and
