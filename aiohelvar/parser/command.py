@@ -21,7 +21,7 @@ class Command:
         command_parameters: List[CommandParameter] = [],
         command_message_type: MessageType = MessageType.COMMAND,
         command_address: HelvarAddress = None,
-        command_result: str = None
+        command_result: str = None,
     ):
         self.command_type = command_type
         self.command_parameters = command_parameters

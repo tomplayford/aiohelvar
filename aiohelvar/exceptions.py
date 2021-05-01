@@ -22,8 +22,9 @@ class UnrecognizedCommand(ParserError):
 
     pass
 
+
 class CommandResponseTimeout(Error):
-    """Exception raised when we don't receive a response to a command to the route within 
+    """Exception raised when we don't receive a response to a command to the route within
     the allowed timeout."""
 
     def __init__(self, command):

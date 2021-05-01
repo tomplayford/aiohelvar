@@ -40,12 +40,12 @@ class CommandParser:
             command_parameters=parameters,
             command_message_type=MessageType(match.group("type")),
             command_address=address,
-            command_result=result
+            command_result=result,
         )
 
     def parse_result(self, match):
         if match.group("result"):
-            return match.group('result')
+            return match.group("result")
         return None
 
     def parse_command_type(self, match):
