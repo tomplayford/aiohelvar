@@ -56,3 +56,9 @@ class HelvarAddress:
                 return False
 
         return True
+
+    def __hash__(self):
+        return hash((self.cluster, self.router, self.subnet, self.device))
+
+    def __ne__(self, other):
+        return not(self == other)

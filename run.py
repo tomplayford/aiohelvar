@@ -8,6 +8,8 @@ async def main():
 
     await router.initialize()
 
-    await asyncio.sleep(100)
+    await asyncio.sleep(20)
+
+    print(router.devices.devices.items())
 
 asyncio.run(main())

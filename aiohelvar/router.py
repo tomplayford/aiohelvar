@@ -1,5 +1,5 @@
 from aiohelvar.parser.address import HelvarAddress
-from aiohelvar.devices import create_devices_from_command
+from aiohelvar.devices import Devices, get_devices
 from asyncio import exceptions
 from .parser.command_type import CommandType
 from .parser.command import Command
@@ -35,12 +35,13 @@ class Router:
 
         self.config = None
         self.groups = None
+
+        self.devices = Devices(self)
         self.lights = None
         self.scenes = None
         self.sensors = None
 
-        self.commands_to_send = []
-        self.command_to_send = asyncio.Event()
+        self.commands_to_send = asyncio.Queue()
 
         self.commands_received = []
         self.command_received = asyncio.Condition()
@@ -138,20 +139,15 @@ class Router:
                     self.commands_received.append(command)
                     self.command_received.notify_all()
                     self.command_received.release()
-            await asyncio.sleep(0.1)
 
     async def _stream_writer(self, reader, writer):
 
         while True:
-            await self.command_to_send.wait()
-            if len(self.commands_to_send) > 0:
-                thing = self.commands_to_send.pop()
-                print(f"found {thing} to send. Sending...")
-                writer.write(thing)
-                await writer.drain()
-                print("Sent!")
-            else:
-                self.command_to_send.clear()
+            command_string = await self.commands_to_send.get()
+            print(f"found {command_string} to send. Sending...")
+            writer.write(command_string)
+            self.commands_to_send.task_done()
+            print("Sent.")
 
     async def initialize(self):
 
@@ -208,27 +204,7 @@ class Router:
 
     async def get_devices(self):
         
-        response_subnet_1 = await self.send_command(
-            Command(
-                CommandType.QUERY_DEVICE_TYPES_AND_ADDRESSES,
-                command_address=HelvarAddress(self.cluster_id, self.router_id, 1)))
-
-        # response_subnet_2 = await self.send_command(
-        #     Command(
-        #         CommandType.QUERY_DEVICE_TYPES_AND_ADDRESSES,
-        #         command_address=HelvarAddress(self.cluster_id, self.router_id, 2)))
-
-        await response_subnet_1
-        # await response_subnet_2
-
-        # commands = [response_subnet_1.result(), response_subnet_2.result()]
-
-        commands = [response_subnet_1.result(),]
-
-        self.devices = await create_devices_from_command(self, commands)
-
-        for device in self.devices:
-            print(device)
+        await get_devices(self)
 
     async def get_scenes(self):
         response = await self.send_command(Command(CommandType.QUERY_SCENE_NAMES))
@@ -290,5 +266,5 @@ class Router:
         return asyncio.create_task(self._send_command_task(command))
 
     async def send_string(self, string: str):
-        self.commands_to_send.append(bytes(string, "utf-8"))
-        self.command_to_send.set()
+        await self.commands_to_send.put(bytes(string, "utf-8"))
+        
