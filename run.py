@@ -16,6 +16,10 @@ async def main():
     for key, value in router.groups.groups.items():
         print(f"{key}: {value}")
     
+    for key, value in router.scenes.scenes.items():
+        print(f"{key}: {value}")
+    
+
     # await router.devices.set_device_load_level(HelvarAddress(0, 1, 2, 60), 95.2, 100)
 
     # await asyncio.sleep(10)

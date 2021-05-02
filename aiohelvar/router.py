@@ -1,5 +1,6 @@
 from .devices import Devices, get_devices
 from .groups import Group, Groups, get_groups
+from .scenes import Scenes, get_scenes
 from .parser.address import HelvarAddress
 from .parser.parser import CommandParser
 from .parser.command_type import CommandType
@@ -33,7 +34,7 @@ class Router:
         self.devices = Devices(self)
         
         self.lights = None
-        self.scenes = None
+        self.scenes = Scenes(self)
         self.sensors = None
 
         self.commands_to_send = asyncio.Queue()
@@ -148,7 +149,7 @@ class Router:
         while True:
             if len(self.command_received._waiters) == 0:
                 return
-            asyncio.sleep(0.5)
+            await asyncio.sleep(0.5)
 
     async def initialize(self):
 
@@ -159,7 +160,7 @@ class Router:
         await self.get_groups()
 
         # Get Devices
-        # await self.get_devices()
+        await self.get_devices()
 
         # Get Clusters
         # await self.get_clusters()
@@ -167,8 +168,7 @@ class Router:
         # Get Scenes 
         await self.get_scenes()
 
-        await self.wait_for_pending_replies()
-
+        # await self.wait_for_pending_replies()
 
         # first_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
         # second_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
@@ -207,7 +207,7 @@ class Router:
 
     async def get_scenes(self):
 
-        pass
+        await get_scenes(self)
 
     # async def get_clusters(self): 
     #     response = await self.send_command(Command(CommandType.QUERY_ROUTERS))
