@@ -1,21 +1,69 @@
 
-from aiohelvar.parser.address import HelvarAddress
-from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
+from .parser.address import HelvarAddress
+from .parser.command_parameter import CommandParameter, CommandParameterType
 from .parser.command_type import CommandType
 from .parser.command import Command
 
 from copy import copy
 import asyncio
 
+PROTOCOL = {
+    1: "DALI",
+    2: "DIGIDIM",
+    3: "SDIM",
+    4: "DMX",
+}
+
+DALI_TYPES = {
+    1: "Fluorescent Lamps",
+    2: "Self contained emergency lighting",
+    3: "Discharge lamps",
+    4: "Low voltage halogen lamps",
+    5: "Conversion to D.C.",
+    6: "LED modules",
+    7: "Switching function",
+    8: "Colour control",
+    9: "Sequencer",
+}
+
 class Device:
-    def __init__(self, address: HelvarAddress, type=None, name=None):
+    """
+    Represents a Helvar device. These map to sensors, lamps and other objects
+
+    The device object is purely represents the device, all acctions on devices
+    are preformed with the Devices factory class and various helper functions.
+    """
+    def __init__(self, address: HelvarAddress, raw_type=None, name=None):
         self.address = address
-        self.name = None
+        self.name = name
         self.state = None
         self.load_level = None
+        self.protocol = None
+        self.type = None
+
+        if raw_type:
+            self.decode_raw_type_bytecode(raw_type)
 
     def __str__(self):
-        return f"Device {self.address}: {self.description}. State: {self.state}. Load: {self.load_level}."
+        return f"Device {self.address}: {self.name}. Protocol: {self.protocol}. Type: {self.type}. State: {self.state}. Load: {self.load_level}."
+
+    def decode_raw_type_bytecode(self, raw_type):
+        """
+        """
+
+        raw_type = int(raw_type)
+
+        if raw_type > (2**32) or raw_type < 0:
+            raise TypeError
+
+        bytes = [raw_type >> shift & 0xff for shift in [0, 8, 16, 24]]
+
+        self.protocol = PROTOCOL[bytes[0]]
+
+        if self.protocol == "DALI":
+            self.type = DALI_TYPES.get(bytes[1], "Undefined")
+
+        # TODO: Decode other device types.
 
 class Devices:
     def __init__(self, router):
@@ -42,35 +90,58 @@ class Devices:
             print(f"Couldn't find device with address: {address}")
             raise
 
+    async def set_device_load_level(self, address, load_level, fade_time=1000):
+        print(f"Updating device {address} load level to {load_level} over {fade_time}ms...")
+
+        async def task(devices, address, load_level):
+            response = await devices.router._send_command_task(
+                Command(CommandType.DIRECT_LEVEL_DEVICE,
+                        [
+                            CommandParameter(CommandParameterType.LEVEL, load_level),
+                            CommandParameter(CommandParameterType.FADE_TIME, fade_time)
+                        ],
+                        command_address=address
+                        ))
+            print(f"Updated device {address} load level to {load_level}.")
+            devices.update_device_load_level(address, response.result)
+
+        asyncio.create_task(task(self, address, load_level))
+
     async def update_device(self, address):
-        # TODO: refactor to tasks rather than callbacks.
         # Update name, state and load.
 
         device = self.devices[address]
 
-        response = await self.router.send_command(
-            Command(
-                CommandType.QUERY_DEVICE_DESCRIPTION,
-                command_address=device.address
+        async def update_name(device):
+            response = await self.router._send_command_task(
+                Command(
+                    CommandType.QUERY_DEVICE_DESCRIPTION,
+                    command_address=device.address
+                )
             )
-        )
-        response.add_done_callback(lambda task: self.update_device_name(device.address, task.result().result))
+            self.update_device_name(device.address, response.result)
 
-        response = await self.router.send_command(
-            Command(
-                CommandType.QUERY_DEVICE_STATE,
-                command_address=device.address
+        async def update_state(device):
+            response = await self.router._send_command_task(
+                Command(
+                    CommandType.QUERY_DEVICE_STATE,
+                    command_address=device.address
+                )
             )
-        )
-        response.add_done_callback(lambda task: self.update_device_state(device.address, task.result().result))
+            self.update_device_state(device.address, response.result)
 
-        response = await self.router.send_command(
-            Command(
-                CommandType.QUERY_DEVICE_LOAD_LEVEL,
-                command_address=device.address
+        async def update_load_level(device):
+            response = await self.router._send_command_task(
+                Command(
+                    CommandType.QUERY_DEVICE_LOAD_LEVEL,
+                    command_address=device.address
+                )
             )
-        )
-        response.add_done_callback(lambda task: self.update_device_load_level(device.address, task.result().result))
+            self.update_device_load_level(device.address, response.result)
+
+        asyncio.create_task(update_name(device))
+        asyncio.create_task(update_state(device))
+        asyncio.create_task(update_load_level(device))
 
 
 async def receive_and_register_devices(router, command):

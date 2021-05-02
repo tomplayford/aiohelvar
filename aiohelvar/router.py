@@ -1,12 +1,13 @@
-from aiohelvar.parser.address import HelvarAddress
-from aiohelvar.devices import Devices, get_devices
-from asyncio import exceptions
+from .devices import Devices, get_devices
+from .groups import Group, Groups, get_groups
+from .parser.address import HelvarAddress
+from .parser.parser import CommandParser
 from .parser.command_type import CommandType
 from .parser.command import Command
 from .exceptions import CommandResponseTimeout, ParserError
-from .parser.parser import CommandParser
 import asyncio
 import datetime
+from asyncio import exceptions
 
 COMMAND_TERMINATOR = b"#"
 
@@ -15,14 +16,6 @@ COMMAND_TERMINATOR = b"#"
 COMMAND_RESPONSE_TIMEOUT = 30
 
 KEEP_ALIVE_PERIOD = 120
-
-# from .config import Config
-from .groups import Group, create_groups_from_command
-# from .lights import Lights
-# from .scenes import Scenes
-# from .sensors import Sensors
-# from .errors import raise_error
-
 
 class Router:
     """Control a Helvar Route."""
@@ -34,9 +27,11 @@ class Router:
         self.router_id = router_id
 
         self.config = None
-        self.groups = None
+        
+        self.groups = Groups(self)
 
         self.devices = Devices(self)
+        
         self.lights = None
         self.scenes = None
         self.sensors = None
@@ -149,6 +144,12 @@ class Router:
             self.commands_to_send.task_done()
             print("Sent.")
 
+    async def wait_for_pending_replies(self):
+        while True:
+            if len(self.command_received._waiters) == 0:
+                return
+            asyncio.sleep(0.5)
+
     async def initialize(self):
 
         # Attempt Connection
@@ -158,14 +159,15 @@ class Router:
         await self.get_groups()
 
         # Get Devices
-        await self.get_devices()
-
+        # await self.get_devices()
 
         # Get Clusters
         # await self.get_clusters()
 
         # Get Scenes 
-        # await self.get_scenes()
+        await self.get_scenes()
+
+        await self.wait_for_pending_replies()
 
 
         # first_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
@@ -196,22 +198,16 @@ class Router:
         #     self.sensors = Sensors(result["sensors"], self.request)
 
     async def get_groups(self):
-        response = await self.send_command(Command(CommandType.QUERY_GROUPS))
 
-        await response
-
-        self.groups = await create_groups_from_command(self, response.result())
+        await get_groups(self)
 
     async def get_devices(self):
         
         await get_devices(self)
 
     async def get_scenes(self):
-        response = await self.send_command(Command(CommandType.QUERY_SCENE_NAMES))
 
-        await response
-
-        # self.groups = await create_groups_from_command(self, response.result())
+        pass
 
     # async def get_clusters(self): 
     #     response = await self.send_command(Command(CommandType.QUERY_ROUTERS))
