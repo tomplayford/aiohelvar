@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="aiohelvar-tomplayford", # Replace with your own username
+    name="aiohelvar",
     version="0.0.1",
     author="Tom Playford",
     description="Async HelvarNet comms",
