@@ -42,6 +42,9 @@ class Router:
         self.commands_received = []
         self.command_received = asyncio.Condition()
 
+        self.connected = False
+
+        self.workgroup_name = None
         # self.capabilities = None
         # self.rules = None
         # self.schedules = None
@@ -62,12 +65,17 @@ class Router:
         except ConnectionError as e:
             self.logger.error("Connection error while connecting to router", e)
             raise 
+        self.connected = True
         self._stream_reader_task = asyncio.create_task(
             self._stream_reader(self._reader)
         )
         self._stream_writer_task = asyncio.create_task(
             self._stream_writer(self._reader, self._writer)
         )
+
+        # Read the workgroup name:
+        response = await self._send_command_task(Command(CommandType.QUERY_WORKGROUP_NAME))
+        self.workgroup_name = response.result
 
         # Kick off the keepalive task
         self._keep_alive_task = asyncio.create_task(self._keep_alive())
@@ -90,6 +98,7 @@ class Router:
 
         self._writer.close()
         await self._writer.wait_closed()
+        self.connected = False
         print("Disconnected.")
 
     async def _keep_alive(self):
@@ -154,7 +163,8 @@ class Router:
     async def initialize(self):
 
         # Attempt Connection
-        await self.connect()
+        if not self.connected:
+            await self.connect()
  
         # Get Groups 
         await self.get_groups()
