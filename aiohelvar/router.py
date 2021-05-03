@@ -94,7 +94,7 @@ class Router:
 
         for task in tasks:
             if task is not None:
-                task.cancel("Disconnecting...")
+                task.cancel()
 
         self._writer.close()
         await self._writer.wait_closed()
