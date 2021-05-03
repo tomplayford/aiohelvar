@@ -18,7 +18,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "aiohelvar"},
-    packages=setuptools.find_packages(where="aiohelvar"),
+
+    packages=["aiohelvar"],
     python_requires=">=3.7",
 )
