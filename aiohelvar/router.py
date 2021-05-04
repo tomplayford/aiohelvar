@@ -217,7 +217,7 @@ class Router:
 
     async def get_scenes(self):
 
-        await get_scenes(self)
+        await get_scenes(self, self.groups)
 
     # async def get_clusters(self): 
     #     response = await self.send_command(Command(CommandType.QUERY_ROUTERS))

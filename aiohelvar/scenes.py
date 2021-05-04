@@ -1,29 +1,23 @@
 
+from .parser.address import SceneAddress
 from .parser.command import Command, CommandParameter, CommandParameterType, CommandType
 
-
-def build_scene_address(group, block, scene):
-    return f"@{group}.{block}.{scene}"
-
 class Scene:
-    def __init__(self, group, block, scene, name=None):
-        self.group = group
-        self.block = block
-        self.scene = scene
+    def __init__(self, scene_address, levels=None, name=None):
         self.name = name
+        self.levels = levels
+        self.address = scene_address
 
-    @property
-    def address(self):
-        return build_scene_address(self.group, self.block, self.scene)
 
     def __eq__(self, o: object) -> bool:
-        return self.group == o.group & self.block == o.block & self.scene == o.scene
+        return self.address == o.address
 
     def __hash__(self) -> int:
-        return hash(self.group, self.block, self.scene)
+        return hash(self.address)
 
     def __str__(self) -> str:
         return f"Scene: {self.address} {self.name}"
+
 
 class Scenes:
     def __init__(self, router):
@@ -33,41 +27,33 @@ class Scenes:
     def register_scene(self, scene_address, scene):
         self.scenes[scene_address] = scene
 
+    def update_scene_name(self, scene_address, name):
+        self.scenes[scene_address].name = name
 
-async def get_scenes(router):
+
+
+async def get_scenes(router, groups):
 
     response = await router._send_command_task(Command(CommandType.QUERY_SCENE_NAMES))
 
-    # # We expect a comma separated list of group ids. 
-    # async def update_name(router, group_id):
-    #     response = await router._send_command_task(
-    #         CommandParameter(
-    #             CommandType.QUERY_GROUP_DESCRIPTION, 
-    #             [CommandParameter(CommandParameterType.GROUP, group_id)]
-    #         ))
-    #     router.groups.update_group_name(group_id, response.result)
-
-    # async def update_group_devices(router, group_id):
-    #     response = await router._send_command_task(
-    #         Command(
-    #             CommandType.QUERY_GROUP, 
-    #             [CommandParameter(CommandParameterType.GROUP, group_id)]
-    #         ))
-
-    #     members = [member.strip("@") for member in response.result.split(",")]
-
-    #     addresses = [HelvarAddress(*member.split('.')) for member in members]
-
-    #     router.groups.update_group_device_members(group_id, addresses)
+    for group in groups.groups.values():
+        for block in range(1, 9):
+            for scene in range(1, 17):
+                scene = Scene(SceneAddress(int(group.group_id), int(block), int(scene)))
+                router.scenes.register_scene(scene.address, scene)
 
     parts = response.result.strip("@").split("@")
-    scenes = []
 
     for part in parts:
         sub_parts = part.split(":")
-        scenes.append(Scene(*sub_parts[0].split("."), sub_parts[1]))
 
-    [router.scenes.register_scene(scene.address, scene) for scene in scenes]
+        try:
+            scene_address = SceneAddress(*[int(a) for a in sub_parts[0].split(".")])
+            router.scenes.update_scene_name(scene_address, sub_parts[1])
+        except KeyError:
+            print(f"Unknown scene address {part}")
+
+    # [router.scenes.register_scene(scene.address, scene) for scene in scenes]
 
     # for group in groups:
     #     router.groups.register_group(group)

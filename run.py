@@ -26,6 +26,6 @@ async def main():
 
     # await router.devices.set_device_load_level(HelvarAddress(0, 1, 2, 60), 0.1, 100)
 
-    # await asyncio.sleep(200)
+    await asyncio.sleep(200)
 
 asyncio.run(main())

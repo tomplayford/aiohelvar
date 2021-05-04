@@ -1,4 +1,5 @@
 
+from aiohelvar.exceptions import UnrecognizedCommand
 from .parser.address import HelvarAddress
 from .parser.command_parameter import CommandParameter, CommandParameterType
 from .parser.command_type import CommandType
@@ -58,12 +59,16 @@ class Device:
 
         bytes = [raw_type >> shift & 0xff for shift in [0, 8, 16, 24]]
 
-        self.protocol = PROTOCOL[bytes[0]]
+        try:
+            self.protocol = PROTOCOL[bytes[0]]
+        except KeyError:
+            raise UnrecognizedCommand(None, f"Known device type {bytes} for address {self.address}.")
 
         if self.protocol == "DALI":
             self.type = DALI_TYPES.get(bytes[1], "Undefined")
 
         # TODO: Decode other device types.
+
 
 class Devices:
     def __init__(self, router):

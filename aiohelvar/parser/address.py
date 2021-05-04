@@ -1,6 +1,7 @@
+
 class HelvarAddress:
     """
-    Represents a Helvar address.
+    Represents a Helvar device address.
 
     Address format is @c.r.s.d
     c - cluster: 0-253
@@ -62,3 +63,38 @@ class HelvarAddress:
 
     def __ne__(self, other):
         return not(self == other)
+
+
+class SceneAddress:
+    """Represents a Helvar scene address.
+
+    Address format is @g.b.c
+
+    g - Group (0-128?)
+    b - Block (1-8?)
+    s - Scene (1-16?)
+
+    group 0 == Un-grouped
+
+    TODO: validate the above.
+
+    """
+    def __init__(self, group: int, block: int, scene: int):
+        #TODO validate group, block and scene values are in range
+
+        self.group = group
+        self.block = block
+        self.scene = scene
+
+    def __str__(self):
+        return f"@{self.group}.{self.block}.{self.scene}"
+
+    def __hash__(self):
+        return hash((self.group, self.block, self.scene))
+
+    def __eq__(self, other):
+
+        return (self.group, self.block, self.scene) == (other.group, other.block, other.scene)
+
+    def __ne__(self, other):
+        return not (self == other)
