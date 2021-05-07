@@ -235,9 +235,9 @@ class Router:
 
         def check_for_command_response():
             for r_command in self.commands_received:
-                if r_command.command_type == command.command_type:
+                if r_command.type_parameters_address == command.type_parameters_address:
                     # this is probably our response.
-                    # We can safely remove from list as we stop iterating.
+                    # We can safely remove ourselves from list as we stop iterating.
                     self.commands_received.remove(r_command)
                     return r_command
             return None

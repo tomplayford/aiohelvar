@@ -1,5 +1,5 @@
 
-from aiohelvar.exceptions import UnrecognizedCommand
+from aiohelvar.exceptions import ParserError, UnrecognizedCommand
 from .parser.address import HelvarAddress
 from .parser.command_parameter import CommandParameter, CommandParameterType
 from .parser.command_type import CommandType
@@ -41,12 +41,15 @@ class Device:
         self.load_level = None
         self.protocol = None
         self.type = None
-
+        self.levels = []
         if raw_type:
             self.decode_raw_type_bytecode(raw_type)
 
     def __str__(self):
-        return f"Device {self.address}: {self.name}. Protocol: {self.protocol}. Type: {self.type}. State: {self.state}. Load: {self.load_level}."
+        return f"Device {self.address}: {self.name}. Protocol: {self.protocol}. Type: {self.type}. State: {self.state}. Load: {self.load_level}. Levels: {self.levels}."
+
+    def set_scene_levels(self, levels: list):
+        self.levels = levels
 
     def decode_raw_type_bytecode(self, raw_type):
         """
@@ -94,6 +97,15 @@ class Devices:
         except KeyError:
             print(f"Couldn't find device with address: {address}")
             raise
+
+    def update_device_scene_level(self, address, scene_levels):
+
+        levels = scene_levels.split(',')
+        if len(levels) != 136:
+            raise ParserError(None, f"Expecting 136 scene levels, got {len(levels)}.")
+
+        self.devices[address].set_scene_levels(levels)
+
 
     async def set_device_load_level(self, address, load_level, fade_time=1000):
         print(f"Updating device {address} load level to {load_level} over {fade_time}ms...")
@@ -144,9 +156,19 @@ class Devices:
             )
             self.update_device_load_level(device.address, response.result)
 
+        async def update_scene_level(device):
+            response = await self.router._send_command_task(
+                Command(
+                    CommandType.QUERY_SCENE_INFO,
+                    command_address=device.address
+                )
+            )
+            self.update_device_scene_level(device.address, response.result)
+
         asyncio.create_task(update_name(device))
         asyncio.create_task(update_state(device))
         asyncio.create_task(update_load_level(device))
+        asyncio.create_task(update_scene_level(device))
 
 
 async def receive_and_register_devices(router, command):

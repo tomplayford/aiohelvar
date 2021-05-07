@@ -52,3 +52,16 @@ class Command:
             main_message = f"{main_message}={self.result}"
 
         return f"{self.command_message_type}{main_message}{default_helvar_termination_char}"
+
+    @property
+    def type_parameters_address(self):
+
+        # return (self.command_type, self.command_parameters, self.command_address)
+
+        parameters = []
+        if self.command_address is not None:
+            parameters.append(self.command_address)
+
+        result = ",".join([str(p) for p in parameters])
+        return f"{self.command_type}:{result}"
+

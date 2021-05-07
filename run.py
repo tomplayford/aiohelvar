@@ -8,7 +8,7 @@ async def main():
 
     await router.initialize()
 
-    await asyncio.sleep(10)
+    await asyncio.sleep(20)
 
     for key, value in router.devices.devices.items():
         print(f"{key}: {value}")

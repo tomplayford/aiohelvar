@@ -33,3 +33,6 @@ class CommandParameter:
 
     def __str__(self):
         return f"{self.command_parameter_type}:{self.argument}"
+
+    def __eq__(self, o):
+        return (self.command_parameter_type, self.argument) == (o.command_parameter_type, o.argument)
