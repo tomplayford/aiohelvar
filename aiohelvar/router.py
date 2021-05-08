@@ -21,21 +21,22 @@ COMMAND_RESPONSE_TIMEOUT = 30
 
 KEEP_ALIVE_PERIOD = 120
 
+
 class Router:
     """Control a Helvar Route."""
 
-    def __init__(self, host, port, cluster_id = 0, router_id = 1):
+    def __init__(self, host, port, cluster_id=0, router_id=1):
         self.host = host
         self.port = port
         self.cluster_id = cluster_id
         self.router_id = router_id
 
         self.config = None
-        
+
         self.groups = Groups(self)
 
         self.devices = Devices(self)
-        
+
         self.lights = None
         self.scenes = Scenes(self)
         self.sensors = None
@@ -62,12 +63,17 @@ class Router:
 
     async def connect(self):
         _LOGGER.debug("Connecting...")
-        
+
         try:
-            self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
+            self._reader, self._writer = await asyncio.open_connection(
+                self.host, self.port
+            )
         except ConnectionError as e:
-            _LOGGER.error(f"Connection error while connecting to router {self.host}:{self.port} - ", e)
-            raise 
+            _LOGGER.error(
+                f"Connection error while connecting to router {self.host}:{self.port} - ",
+                e,
+            )
+            raise
         self.connected = True
         self._stream_reader_task = asyncio.create_task(
             self._stream_reader(self._reader)
@@ -77,7 +83,9 @@ class Router:
         )
 
         # Read the workgroup name:
-        response = await self._send_command_task(Command(CommandType.QUERY_WORKGROUP_NAME))
+        response = await self._send_command_task(
+            Command(CommandType.QUERY_WORKGROUP_NAME)
+        )
         self.workgroup_name = response.result
 
         # Kick off the keepalive task
@@ -110,7 +118,9 @@ class Router:
         def _keep_alive_callback(task):
 
             if task.exception():
-                _LOGGER.warn(f"Keep alive encountered an exception: {task.exception()}.")
+                _LOGGER.warn(
+                    f"Keep alive encountered an exception: {task.exception()}."
+                )
                 if isinstance(task.exception(), CommandResponseTimeout):
                     # Timeout - reconnect.
                     _LOGGER.warn("Keepalive didn't - reconnecting...")
@@ -169,8 +179,8 @@ class Router:
         # Attempt Connection
         if not self.connected:
             await self.connect()
- 
-        # Get Groups 
+
+        # Get Groups
         await self.get_groups()
 
         # Get Devices
@@ -179,7 +189,7 @@ class Router:
         # Get Clusters
         # await self.get_clusters()
 
-        # Get Scenes 
+        # Get Scenes
         await self.get_scenes()
 
         # await self.wait_for_pending_replies()
@@ -216,20 +226,19 @@ class Router:
         await get_groups(self)
 
     async def get_devices(self):
-        
+
         await get_devices(self)
 
     async def get_scenes(self):
 
         await get_scenes(self, self.groups)
 
-    # async def get_clusters(self): 
+    # async def get_clusters(self):
     #     response = await self.send_command(Command(CommandType.QUERY_ROUTERS))
 
     #     await response
 
     #     print(response.result())
-
 
     async def _send_command_task(self, command: Command):
 
@@ -238,10 +247,10 @@ class Router:
         await self.send_string(str(command))
 
         def check_for_command_response():
-            """ Task that is scheduled after every command is sent. It checks for incoming messages
+            """Task that is scheduled after every command is sent. It checks for incoming messages
             from the router, looking for its reply.
             We match all command parameters, but we can't guarantee that identical requests don't steal
-            eachothers replies. """
+            eachothers replies."""
 
             for r_command in self.commands_received:
                 if r_command.type_parameters_address == command.type_parameters_address:
@@ -249,7 +258,9 @@ class Router:
                     # We can safely remove ourselves from list as we stop iterating.
 
                     if r_command.command_message_type == MessageType.ERROR:
-                        _LOGGER.error(f"Request command {command} triggered an error back from the router: {r_command}.")
+                        _LOGGER.error(
+                            f"Request command {command} triggered an error back from the router: {r_command}."
+                        )
 
                     self.commands_received.remove(r_command)
                     return r_command
@@ -286,4 +297,3 @@ class Router:
 
     async def send_string(self, string: str):
         await self.commands_to_send.put(bytes(string, "utf-8"))
-        

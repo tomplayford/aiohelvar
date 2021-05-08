@@ -1,4 +1,3 @@
-
 from .parser.address import SceneAddress
 from .parser.command import Command, CommandParameter, CommandParameterType, CommandType
 import logging
@@ -11,7 +10,6 @@ class Scene:
         self.name = name
         self.levels = levels
         self.address = scene_address
-
 
     def __eq__(self, o: object) -> bool:
         return self.address == o.address
@@ -33,7 +31,6 @@ class Scenes:
 
     def update_scene_name(self, scene_address, name):
         self.scenes[scene_address].name = name
-
 
 
 async def get_scenes(router, groups):

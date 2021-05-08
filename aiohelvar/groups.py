@@ -1,4 +1,3 @@
-
 from aiohelvar.parser.address import HelvarAddress
 import asyncio
 from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
@@ -32,7 +31,7 @@ class Groups:
 
     def update_group_name(self, group_id, name):
         self.groups[group_id].name = name
-    
+
     def update_group_device_members(self, group_id, addresses):
         self.groups[group_id].devices = addresses
 
@@ -41,29 +40,31 @@ async def get_groups(router):
 
     response = await router._send_command_task(Command(CommandType.QUERY_GROUPS))
 
-    # We expect a comma separated list of group ids. 
+    # We expect a comma separated list of group ids.
     async def update_name(router, group_id):
         response = await router._send_command_task(
             Command(
-                CommandType.QUERY_GROUP_DESCRIPTION, 
-                [CommandParameter(CommandParameterType.GROUP, group_id)]
-            ))
+                CommandType.QUERY_GROUP_DESCRIPTION,
+                [CommandParameter(CommandParameterType.GROUP, group_id)],
+            )
+        )
         router.groups.update_group_name(group_id, response.result)
 
     async def update_group_devices(router, group_id):
         response = await router._send_command_task(
             Command(
-                CommandType.QUERY_GROUP, 
-                [CommandParameter(CommandParameterType.GROUP, group_id)]
-            ))
+                CommandType.QUERY_GROUP,
+                [CommandParameter(CommandParameterType.GROUP, group_id)],
+            )
+        )
 
         members = [member.strip("@") for member in response.result.split(",")]
 
-        addresses = [HelvarAddress(*member.split('.')) for member in members]
+        addresses = [HelvarAddress(*member.split(".")) for member in members]
 
         router.groups.update_group_device_members(group_id, addresses)
 
-    groups = [Group(group_id) for group_id in response.result.split(',')]
+    groups = [Group(group_id) for group_id in response.result.split(",")]
 
     for group in groups:
         router.groups.register_group(group)

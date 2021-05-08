@@ -64,4 +64,3 @@ class Command:
 
         result = ",".join([str(p) for p in parameters])
         return f"{self.command_type}:{result}"
-

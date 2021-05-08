@@ -1,4 +1,3 @@
-
 class HelvarAddress:
     """
     Represents a Helvar device address.
@@ -62,7 +61,7 @@ class HelvarAddress:
         return hash((self.cluster, self.router, self.subnet, self.device))
 
     def __ne__(self, other):
-        return not(self == other)
+        return not (self == other)
 
 
 class SceneAddress:
@@ -79,8 +78,9 @@ class SceneAddress:
     TODO: validate the above.
 
     """
+
     def __init__(self, group: int, block: int, scene: int):
-        #TODO validate group, block and scene values are in range
+        # TODO validate group, block and scene values are in range
 
         self.group = group
         self.block = block
@@ -94,7 +94,11 @@ class SceneAddress:
 
     def __eq__(self, other):
 
-        return (self.group, self.block, self.scene) == (other.group, other.block, other.scene)
+        return (self.group, self.block, self.scene) == (
+            other.group,
+            other.block,
+            other.scene,
+        )
 
     def __ne__(self, other):
         return not (self == other)
