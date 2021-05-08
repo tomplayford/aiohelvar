@@ -69,13 +69,11 @@ class SceneAddress:
 
     Address format is @g.b.c
 
-    g - Group (0-128?)
-    b - Block (1-8?)
-    s - Scene (1-16?)
+    g - Group (0-128)
+    b - Block (1-8)
+    s - Scene (1-16)
 
     group 0 == Un-grouped
-
-    TODO: validate the above.
 
     """
 
@@ -102,3 +100,9 @@ class SceneAddress:
 
     def __ne__(self, other):
         return not (self == other)
+
+    def to_device_int(self) -> int:
+        return self.block * 16 + self.scene
+
+    def to_int(self) -> int:
+        return self.group * (8*16) + self.block * 16 + self.scene

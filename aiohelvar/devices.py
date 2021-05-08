@@ -10,7 +10,7 @@ from .static import (
     h_2_d,
 )
 from .exceptions import ParserError, UnrecognizedCommand
-from .parser.address import HelvarAddress
+from .parser.address import HelvarAddress, SceneAddress
 from .parser.command_parameter import CommandParameter, CommandParameterType
 from .parser.command_type import CommandType
 from .parser.command import Command
@@ -29,17 +29,15 @@ def d_2_h(d):
 
 class Device:
     """
-    Represents a Helvar device. These map to sensors, lamps and other objects
-
-    The device object is purely represents the device, all acctions on devices
-    are preformed with the Devices factory class and various helper functions.
+    Represents a Helvar device. These map to sensors, drivers, relays etc.
     """
 
     def __init__(self, address: HelvarAddress, raw_type=None, name=None):
         self.address = address
         self.name = name
         self.state = 0
-        self.load_level = None
+        self.load_level: float = 0.0
+        self.last_load_level: float = 0.0
         self.protocol = None
         self.type = None
         self.levels = []
@@ -78,6 +76,8 @@ class Device:
 
     @property
     def is_load(self):
+        """ Loads can have scene values, and can have load levels set.
+        """
         if self.protocol == "DALI":
             return True
         if self.protocol == "DIGIDIM":
@@ -86,8 +86,47 @@ class Device:
         else:
             return True
 
+    async def _set_level(self, level: float):
+        if not self.is_load:
+            return
+
+        if level < 0:
+            level = 0.0
+        if level > 100:
+            level == 100.0
+
+        if level == 0 and self.load_level > 0:
+            self.last_load_level = self.load_level
+
+        self.load_level = level
+
+    async def set_scene_level(self, scene_address: SceneAddress):
+
+        level = self.get_level_for_scene(scene_address)
+
+        if level == "*" or level is None:
+            return None
+
+        if level == "L":
+            # Last level before device was powered off.
+            level = self.last_load_level
+        else:
+            level = float(level)
+
+        await self._set_level(level)
+
+    def get_level_for_scene(self, scene_address: SceneAddress):
+
+        if self.levels is None:
+            return None
+
+        try:
+            return self.levels[scene_address.to_device_int()]
+        except IndexError:
+            _LOGGER.error(f"Couldn't find scene {scene_address} ({scene_address.to_device_int()}) in device {self.address}. Device has {len(self.levels)} known scene levels. ")
+            raise
+
     def decode_raw_type_bytecode(self, raw_type):
-        """"""
 
         raw_type = int(raw_type)
 

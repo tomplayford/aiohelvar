@@ -1,3 +1,4 @@
+from aiohelvar.parser.command_parameter import CommandParameterType
 from .devices import Devices, get_devices
 from .groups import Group, Groups, get_groups
 from .scenes import Scenes, get_scenes
@@ -153,6 +154,11 @@ class Router:
                     raise e
                 else:
                     _LOGGER.info(f"Received the following command: {command}")
+
+                    if command.command_type == CommandType.RECALL_SCENE:
+                        asyncio.create_task(self.handle_scene_recall(command))
+                        continue
+
                     await self.command_received.acquire()
                     self.commands_received.append(command)
                     self.command_received.notify_all()
@@ -297,3 +303,11 @@ class Router:
 
     async def send_string(self, string: str):
         await self.commands_to_send.put(bytes(string, "utf-8"))
+
+    async def handle_scene_recall(self, command: Command):
+
+        scene_address = command.get_scene_address()
+        fade_time = command.get_param_value(CommandParameterType.FADE_TIME)
+
+        await self.groups.handle_scene_callback(scene_address, fade_time)
+

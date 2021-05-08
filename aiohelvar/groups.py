@@ -1,13 +1,18 @@
-from aiohelvar.parser.address import HelvarAddress
+from aiohelvar.static import DEFAULT_FADE_TIME
+from aiohelvar.parser.address import HelvarAddress, SceneAddress
 import asyncio
 from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
 from .parser.command_type import CommandType
 from .parser.command import Command
 
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 class Group:
-    def __init__(self, group_id, name=None):
-        self.group_id = group_id
+    def __init__(self, group_id: int, name=None):
+        self.group_id: int = group_id
         self.name = None
         self.devices = []
 
@@ -20,21 +25,59 @@ class Group:
     def __eq__(self, o: object) -> bool:
         return self.group_id == o.group_id
 
+    def get_levels_for_scene(self, scene_address):
+        pass
+        # levels = {}
+        
+        # for device in self.devices:
+        #     levels[device.address] = device.level_for_scene(scene_address)
+
+        # return levels
 
 class Groups:
     def __init__(self, router):
         self.router = router
         self.groups = {}
 
-    def register_group(self, group):
-        self.groups[group.group_id] = group
+    def register_group(self, group: Group):
+        self.groups[int(group.group_id)] = group
 
-    def update_group_name(self, group_id, name):
-        self.groups[group_id].name = name
+    def update_group_name(self, group_id: int, name):
+        self.groups[int(group_id)].name = name
 
-    def update_group_device_members(self, group_id, addresses):
-        self.groups[group_id].devices = addresses
+    def update_group_device_members(self, group_id: int, addresses):
+        self.groups[int(group_id)].devices = addresses
 
+    async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
+
+        if scene_address.group not in self.groups.keys():
+            _LOGGER.info(f"Scene {scene_address} not in any group. Ignoring.")
+            return
+
+        _LOGGER.info(f"Updating devices in scene {scene_address}...")
+        for device_address in self.groups[scene_address.group].devices:
+            device = self.router.devices.devices.get(device_address)
+            if device is None:
+                _LOGGER.warning(f"Can't find device {device_address} registered in group {scene_address.group}.")
+                continue
+            await device.set_scene_level(scene_address)
+            
+        _LOGGER.info(f"Updated devices in scene {scene_address}.")
+
+    async def set_scene(self, scene_address: SceneAddress, fade_time=DEFAULT_FADE_TIME):
+        """Set the scene with the router, we'll get a callback that well use to update device state."""
+
+        await self.router.send_command(
+            Command(
+                CommandType.RECALL_SCENE,
+                [
+                    CommandParameter(CommandParameterType.GROUP, scene_address.group),
+                    CommandParameter(CommandParameterType.BLOCK, scene_address.block),
+                    CommandParameter(CommandParameterType.SCENE, scene_address.scene),
+                    CommandParameter(CommandParameterType.FADE_TIME, fade_time)
+                ],
+            )
+        )
 
 async def get_groups(router):
 

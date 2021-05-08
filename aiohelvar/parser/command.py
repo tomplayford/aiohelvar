@@ -1,6 +1,6 @@
 from .command_type import CommandType, MessageType
 from .command_parameter import CommandParameter, CommandParameterType
-from .address import HelvarAddress
+from .address import HelvarAddress, SceneAddress
 from typing import List
 
 default_helvarNet_version = "1"
@@ -52,6 +52,22 @@ class Command:
             main_message = f"{main_message}={self.result}"
 
         return f"{self.command_message_type}{main_message}{default_helvar_termination_char}"
+
+    def get_param_value(self, parameter_type: CommandParameterType):
+        for parameter in self.command_parameters:
+            if parameter.command_parameter_type == parameter_type:
+                return parameter.argument
+        return None
+
+    def get_scene_address(self):
+
+        group = self.get_param_value(CommandParameterType.GROUP)
+        block = self.get_param_value(CommandParameterType.BLOCK)
+        scene = self.get_param_value(CommandParameterType.SCENE)
+
+        if group is not None and block is not None and scene is not None:
+            return SceneAddress(int(group), int(block), int(scene))
+        return None
 
     @property
     def type_parameters_address(self):
