@@ -24,6 +24,7 @@ async def main():
 
     for key, value in router.devices.devices.items():
         print(f"{key}: {value}")
+        print(f"Device {key} states are: {value._get_states()}")
 
     for key, value in router.groups.groups.items():
         print(f"{key}: {value}")
@@ -38,6 +39,6 @@ async def main():
 
     # await router.devices.set_device_load_level(HelvarAddress(0, 1, 2, 60), 0.1, 100)
 
-    await asyncio.sleep(200)
+    # await asyncio.sleep(200)
 
 asyncio.run(main())
