@@ -8,6 +8,11 @@ from .parser.command import Command
 from copy import copy
 import asyncio
 
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
+
 PROTOCOL = {
     1: "DALI",
     2: "DIGIDIM",
@@ -25,6 +30,63 @@ DALI_TYPES = {
     7: "Switching function",
     8: "Colour control",
     9: "Sequencer",
+}
+
+UNKNOWN_DALI_TYPE = "Unknown DALI Device"
+class DigidimType:
+    def __init__(self, part_number, name, is_load) -> None:
+        self.part_number = part_number
+        self.name = name
+        self.is_load = is_load
+    
+    def __str__(self):
+        return f"{self.part_number} - {self.name}"
+
+def s(a ,b, c):
+    return (a << 16) + (b << 8) + c
+
+UNKNOWN_DIGIDIM_TYPE = DigidimType("0", "Unknown DIGIDIM Device", False)
+
+DIGIDIM_TYPES = {
+    s(0x00, 0x10, 0x08): DigidimType("100", "Rotary", False),
+    s(0x00, 0x11, 0x07): DigidimType("110", "Single Slider", False),
+    s(0x00, 0x11, 0x14): DigidimType("111", "Double Slider", False),
+    s(0x00, 0x12, 0x13): DigidimType("121", "2 Button on/off + IR", False),
+    s(0x00, 0x12, 0x20): DigidimType("122", "2 Button modifier + IR", False),
+    s(0x00, 0x12, 0x44): DigidimType("124", "5 Button + IR", False),
+    s(0x00, 0x12, 0x51): DigidimType("125", "5 Button + modifier + IR", False),
+    s(0x00, 0x12, 0x68): DigidimType("126", "8 Button + IR", False),
+    s(0x00, 0x17, 0x01): DigidimType("170", "IR Receiver", False),
+    s(0x00, 0x31, 0x25): DigidimType("312", "Multisensor", False),
+
+    s(0x00, 0x41, 0x08): DigidimType("410", "Ballast Style 1-10V Converter", True),
+    s(0x00, 0x41, 0x60): DigidimType("416S", "16A Dimmer", True),
+    s(0x00, 0x42, 0x52): DigidimType("425S", "25A Dimmer", True),
+
+    s(0x00, 0x44, 0x43): DigidimType("444", "Multi Input Unit", False),
+
+    s(0x00, 0x45, 0x04): DigidimType("450", "800W Dimmer", True),
+    s(0x00, 0x45, 0x28): DigidimType("452", "1000W Universal Dimmer", True),
+    s(0x00, 0x45, 0x59): DigidimType("455", "500W Thyristor Dimmer", True),
+    s(0x00, 0x45, 0x80): DigidimType("458/DIM8", "8 Channel Dimmer", True),
+    s(0x74, 0x45, 0x81): DigidimType("458/CTR8", "8 Channel Ballast Controller", True),
+    s(0x04, 0x45, 0x83): DigidimType("458/SW8", "8 Channel Relay Unit", True),
+    s(0x00, 0x45, 0x86): DigidimType("458/OPT", "4 Channel Options Module", True),
+
+    s(0x00, 0x46, 0x03): DigidimType("460", "DALI to SDIM Converter", True),
+    s(0x00, 0x47, 0x26): DigidimType("472", "Din Rail 1-10V Converter", True),
+    s(0x00, 0x47, 0x40): DigidimType("474", "4 Channel Ballast Controller - Output Unit", True),
+    s(0x00, 0x47, 0x41): DigidimType("474", "4 Channel Ballast Controller - Relay Unit", True),
+    s(0x00, 0x49, 0x00): DigidimType("490", "Blinds Unit", True),
+    s(0x00, 0x49, 0x48): DigidimType("494", "Blinds Relay", True),
+    s(0x00, 0x49, 0x86): DigidimType("498", "Relay Unit", True),
+
+    s(0x00, 0x80, 0x45): DigidimType("804", "Digidim 4", False),
+    s(0x00, 0x92, 0x40): DigidimType("924", "LCD TouchPanel", False),
+    s(0x00, 0x93, 0x56): DigidimType("935", "Scene Commander (6 Buttons)", False),
+    s(0x00, 0x93, 0x94): DigidimType("939", "Scene Commander (10 Buttons)", False),
+    s(0x00, 0x94, 0x24): DigidimType("942", "Analogue Input Unit", False),
+
 }
 
 class Device:
@@ -68,8 +130,18 @@ class Device:
             raise UnrecognizedCommand(None, f"Known device type {bytes} for address {self.address}.")
 
         if self.protocol == "DALI":
-            self.type = DALI_TYPES.get(bytes[1], "Undefined")
-
+            try:
+                self.type = DALI_TYPES.get(bytes[1], "Undefined")
+            except KeyError:
+                _LOGGER.error(f"Encountered unknown DALI device type of {raw_type}")
+                self.type = UNKNOWN_DALI_TYPE
+        if self.protocol == "DIGIDIM":
+            try:
+                self.type = DIGIDIM_TYPES.get(s(*bytes[:-4:-1]))
+            except KeyError:
+                _LOGGER.error(f"Encountered unknown DIGIDIM device type of {raw_type}")
+                self.type = UNKNOWN_DIGIDIM_TYPE
+        
         # TODO: Decode other device types.
 
 
@@ -91,11 +163,11 @@ class Devices:
         self._update_device_param(address, 'name', name)
 
     def _update_device_param(self, address, param, value):
-        print(f"Updating {param} on device {address} to {value}")
+        _LOGGER.debug(f"Updating {param} on device {address} to {value}")
         try:
             setattr(self.devices[address], param, value)
         except KeyError:
-            print(f"Couldn't find device with address: {address}")
+            _LOGGER.warn(f"Couldn't find device with address: {address}")
             raise
 
     def update_device_scene_level(self, address, scene_levels):
@@ -108,7 +180,7 @@ class Devices:
 
 
     async def set_device_load_level(self, address, load_level, fade_time=1000):
-        print(f"Updating device {address} load level to {load_level} over {fade_time}ms...")
+        _LOGGER.info(f"Updating device {address} load level to {load_level} over {fade_time}ms...")
 
         async def task(devices, address, load_level):
             response = await devices.router._send_command_task(
@@ -119,7 +191,7 @@ class Devices:
                         ],
                         command_address=address
                         ))
-            print(f"Updated device {address} load level to {load_level}.")
+            _LOGGER.debug(f"Updated device {address} load level to {load_level}.")
             devices.update_device_load_level(address, response.result)
 
         asyncio.create_task(task(self, address, load_level))

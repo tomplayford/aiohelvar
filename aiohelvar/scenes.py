@@ -1,6 +1,10 @@
 
 from .parser.address import SceneAddress
 from .parser.command import Command, CommandParameter, CommandParameterType, CommandType
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 class Scene:
     def __init__(self, scene_address, levels=None, name=None):
@@ -51,7 +55,7 @@ async def get_scenes(router, groups):
             scene_address = SceneAddress(*[int(a) for a in sub_parts[0].split(".")])
             router.scenes.update_scene_name(scene_address, sub_parts[1])
         except KeyError:
-            print(f"Unknown scene address {part}")
+            _LOGGER.error(f"Unknown scene address {part}")
 
     # [router.scenes.register_scene(scene.address, scene) for scene in scenes]
 

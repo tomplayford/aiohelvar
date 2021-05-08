@@ -3,12 +3,15 @@ from .groups import Group, Groups, get_groups
 from .scenes import Scenes, get_scenes
 from .parser.address import HelvarAddress
 from .parser.parser import CommandParser
-from .parser.command_type import CommandType
+from .parser.command_type import CommandType, MessageType
 from .parser.command import Command
 from .exceptions import CommandResponseTimeout, ParserError
 import asyncio
 import datetime
-from asyncio import exceptions
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 COMMAND_TERMINATOR = b"#"
 
@@ -58,12 +61,12 @@ class Router:
         return self._router_id
 
     async def connect(self):
-        print("Connecting...")
+        _LOGGER.debug("Connecting...")
         
         try:
             self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
         except ConnectionError as e:
-            self.logger.error("Connection error while connecting to router", e)
+            _LOGGER.error(f"Connection error while connecting to router {self.host}:{self.port} - ", e)
             raise 
         self.connected = True
         self._stream_reader_task = asyncio.create_task(
@@ -85,7 +88,7 @@ class Router:
         await self.connect()
 
     async def disconnect(self):
-        print("Disconnecting...")
+        _LOGGER.info("Disconnecting...")
         tasks = [
             self._stream_reader_task,
             self._stream_writer_task,
@@ -99,7 +102,7 @@ class Router:
         self._writer.close()
         await self._writer.wait_closed()
         self.connected = False
-        print("Disconnected.")
+        _LOGGER.info("Disconnected.")
 
     async def _keep_alive(self):
         """Keep the TCP connection alive. This'll also clean up any stale command futures."""
@@ -107,15 +110,15 @@ class Router:
         def _keep_alive_callback(task):
 
             if task.exception():
-                print(f"Keep alive encountered an exception: {task.exception()}.")
+                _LOGGER.warn(f"Keep alive encountered an exception: {task.exception()}.")
                 if isinstance(task.exception(), CommandResponseTimeout):
                     # Timeout - reconnect.
-                    print("Keepalive didn't - reconnecting...")
+                    _LOGGER.warn("Keepalive didn't - reconnecting...")
                     asyncio.create_task(self.reconnect())
                     return
                 else:
                     raise (task.exception())
-            print("Keepalive kept the connection alive.")
+            _LOGGER.debug("Keepalive kept the router TCP connection alive.")
 
         while True:
             await asyncio.sleep(KEEP_ALIVE_PERIOD)
@@ -124,22 +127,22 @@ class Router:
             keepalive.add_done_callback(_keep_alive_callback)
 
     async def _stream_reader(self, reader):
-        print("Connected.")
+        _LOGGER.info("Connected.")
         parser = CommandParser()
 
         while True:
             line = await reader.readuntil(COMMAND_TERMINATOR)
             if line is not None:
 
-                print(f"We've received the following: {line}")
+                _LOGGER.debug(f"We've received the following from the router: {line}")
                 try:
                     command = parser.parse_command(line)
                 except ParserError as e:
-                    print(f"Exception handling line: {e}")
+                    _LOGGER.error(f"Exception handling line from router: {e}")
                 except Exception as e:
                     raise e
                 else:
-                    print(f"Found the following command: {command}")
+                    _LOGGER.info(f"Received the following command: {command}")
                     await self.command_received.acquire()
                     self.commands_received.append(command)
                     self.command_received.notify_all()
@@ -149,16 +152,17 @@ class Router:
 
         while True:
             command_string = await self.commands_to_send.get()
-            print(f"found {command_string} to send. Sending...")
+            _LOGGER.debug(f"found {command_string} to send. Sending...")
             writer.write(command_string)
+            await asyncio.sleep(0.01)
+            await writer.drain()
             self.commands_to_send.task_done()
-            print("Sent.")
 
     async def wait_for_pending_replies(self):
         while True:
             if len(self.command_received._waiters) == 0:
                 return
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.1)
 
     async def initialize(self):
 
@@ -234,10 +238,19 @@ class Router:
         await self.send_string(str(command))
 
         def check_for_command_response():
+            """ Task that is scheduled after every command is sent. It checks for incoming messages
+            from the router, looking for its reply.
+            We match all command parameters, but we can't guarantee that identical requests don't steal
+            eachothers replies. """
+
             for r_command in self.commands_received:
                 if r_command.type_parameters_address == command.type_parameters_address:
                     # this is probably our response.
                     # We can safely remove ourselves from list as we stop iterating.
+
+                    if r_command.command_message_type == MessageType.ERROR:
+                        _LOGGER.error(f"Request command {command} triggered an error back from the router: {r_command}.")
+
                     self.commands_received.remove(r_command)
                     return r_command
             return None

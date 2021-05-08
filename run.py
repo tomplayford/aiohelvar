@@ -1,8 +1,20 @@
 import asyncio
 from aiohelvar.router import Router
-from aiohelvar.parser.address import HelvarAddress
+import logging
+
 
 async def main():
+
+
+
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.WARN)
+
+    logging.getLogger('').addHandler(console)
+
+
+    logging.basicConfig()
 
     router = Router("10.254.0.1", 50000)
 
@@ -16,8 +28,8 @@ async def main():
     for key, value in router.groups.groups.items():
         print(f"{key}: {value}")
     
-    for key, value in router.scenes.scenes.items():
-        print(f"{key}: {value}")
+    # for key, value in router.scenes.scenes.items():
+    #     print(f"{key}: {value}")
     
 
     # await router.devices.set_device_load_level(HelvarAddress(0, 1, 2, 60), 95.2, 100)
