@@ -39,6 +39,7 @@ class Device:
         # Helvar stores brightness as a float between 0 and 100.
         self.load_level: float = 0.0
         self.last_load_level: float = 0.0
+        self.last_scene = None
         self.protocol = None
         self.type = None
         self.levels = []
@@ -114,6 +115,8 @@ class Device:
             return
 
         level = self.get_level_for_scene(scene_address)
+
+        self.last_scene = scene_address
 
         if level == "*" or level is None:
             return None

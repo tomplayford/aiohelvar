@@ -2,7 +2,7 @@ from aiohelvar.static import DEFAULT_FADE_TIME
 from aiohelvar.parser.address import HelvarAddress, SceneAddress
 import asyncio
 from aiohelvar.parser.command_parameter import CommandParameter, CommandParameterType
-from .parser.command_type import CommandType
+from .parser.command_type import CommandType, MessageType
 from .parser.command import Command
 
 import logging
@@ -10,11 +10,17 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
+def blockscene_to_block_and_scene(block_scene: int):
+    scene = block_scene % 16
+    block = ((block_scene - scene) / 8) + 1
+    return block, scene
+
 class Group:
     def __init__(self, group_id: int, name=None):
         self.group_id: int = group_id
         self.name = None
         self.devices = []
+        self.last_scene = None
 
     def __str__(self):
         return f"Group {self.group_id}: {self.name}. Has {len(self.devices)} devices."
@@ -29,7 +35,7 @@ class Group:
         pass
         # TODO
         # levels = {}
-        
+
         # for device in self.devices:
         #     levels[device.address] = device.level_for_scene(scene_address)
 
@@ -55,6 +61,9 @@ class Groups:
             _LOGGER.info(f"Scene {scene_address} not in any known group. Ignoring.")
             return
 
+        group = self.groups[scene_address.group]
+        group.last_scene = scene_address
+
         _LOGGER.info(f"Updating devices in scene {scene_address}...")
         for device_address in self.groups[scene_address.group].devices:
             device = self.router.devices.devices.get(device_address)
@@ -62,7 +71,7 @@ class Groups:
                 _LOGGER.warning(f"Can't find device {device_address} registered in group {scene_address.group}.")
                 continue
             await device.set_scene_level(scene_address)
-            
+
         _LOGGER.info(f"Updated devices in scene {scene_address}.")
 
     async def set_scene(self, scene_address: SceneAddress, fade_time=DEFAULT_FADE_TIME):
@@ -107,6 +116,29 @@ async def get_groups(router):
         addresses = [HelvarAddress(*member.split(".")) for member in members]
 
         router.groups.update_group_device_members(group_id, addresses)
+
+
+    async def update_group_last_scene(router, group_id):
+        response = await router._send_command_task(
+            Command(
+                CommandType.QUERY_LAST_SCENE_IN_GROUP,
+                [CommandParameter(CommandParameterType.GROUP, group_id)],
+            )
+        )
+
+        if response.command_message_type != MessageType.REPLY:
+            if response.command_message_type != MessageType.ERROR:
+                _LOGGER.error(f"Error reply to command: {response}")
+                return
+            _LOGGER.error(f"Unexpected reply to command: {response}")
+
+        block_scene = int(response.result)
+        scene_address = SceneAddress(group_id, *blockscene_to_block_and_scene(block_scene))
+        router.groups.handle_scene_callback(scene_address)
+
+
+
+        
 
     groups = [Group(group_id) for group_id in response.result.split(",")]
 
