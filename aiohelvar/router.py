@@ -4,7 +4,7 @@ from .groups import Group, Groups, get_groups
 from .scenes import Scenes, get_scenes
 from .parser.address import HelvarAddress
 from .parser.parser import CommandParser
-from .parser.command_type import CommandType, MessageType
+from .parser.command_type import COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE, CommandType, MessageType
 from .parser.command import Command
 from .exceptions import CommandResponseTimeout, ParserError
 import asyncio
@@ -270,6 +270,9 @@ class Router:
 
                     self.commands_received.remove(r_command)
                     return r_command
+            return None
+
+        if command.command_type in COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE:
             return None
 
         response = check_for_command_response()

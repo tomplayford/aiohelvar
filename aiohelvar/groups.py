@@ -117,7 +117,6 @@ async def get_groups(router):
 
         router.groups.update_group_device_members(group_id, addresses)
 
-
     async def update_group_last_scene(router, group_id):
         response = await router._send_command_task(
             Command(
@@ -136,13 +135,11 @@ async def get_groups(router):
         scene_address = SceneAddress(group_id, *blockscene_to_block_and_scene(block_scene))
         router.groups.handle_scene_callback(scene_address)
 
-
-
-        
-
     groups = [Group(group_id) for group_id in response.result.split(",")]
 
     for group in groups:
         router.groups.register_group(group)
         asyncio.create_task(update_name(router, group.group_id))
         asyncio.create_task(update_group_devices(router, group.group_id))
+        asyncio.create_task(update_group_last_scene(router, group.group_id))
+
