@@ -36,6 +36,7 @@ class Device:
         self.address = address
         self.name = name
         self.state = 0
+        # Helvar stores brightness as a float between 0 and 100.
         self.load_level: float = 0.0
         self.last_load_level: float = 0.0
         self.protocol = None
@@ -54,6 +55,11 @@ class Device:
             states[state.state] = int(self.state) & mask > 0
 
         return states
+
+    @property
+    def brightness(self):
+        """ Translate load level to 0-255 brightness value"""
+        return int(self.load_level * 2.55)
 
     @property
     def is_disabled(self):
