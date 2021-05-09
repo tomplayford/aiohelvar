@@ -12,8 +12,8 @@ _LOGGER = logging.getLogger(__name__)
 
 def blockscene_to_block_and_scene(block_scene: int):
     scene = block_scene % 16
-    block = ((block_scene - scene) / 8) + 1
-    return block, scene
+    block = ((block_scene - scene) / 16) + 1
+    return block, scene + 1
 
 class Group:
     def __init__(self, group_id: int, name=None):
