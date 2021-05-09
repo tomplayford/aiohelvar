@@ -133,7 +133,7 @@ async def get_groups(router):
 
         block_scene = int(response.result)
         scene_address = SceneAddress(group_id, *blockscene_to_block_and_scene(block_scene))
-        router.groups.handle_scene_callback(scene_address)
+        router.groups.handle_scene_callback(scene_address, 10)
 
     groups = [Group(group_id) for group_id in response.result.split(",")]
 
