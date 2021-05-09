@@ -40,6 +40,9 @@ class CommandType(Enum):
         raise KeyError
 
 
+COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE = [CommandType.RECALL_SCENE]
+
+
 class MessageType(Enum):
 
     COMMAND = ">"

@@ -274,6 +274,9 @@ class Devices:
 async def receive_and_register_devices(router, command):
 
     command = await router._send_command_task(command)
+    if command.result is None:
+        _LOGGER.info("No devices found.")
+        return
 
     device_results = command.result.split(",")
     for device_result in device_results:
