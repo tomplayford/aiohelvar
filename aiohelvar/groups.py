@@ -27,6 +27,7 @@ class Group:
 
     def get_levels_for_scene(self, scene_address):
         pass
+        # TODO
         # levels = {}
         
         # for device in self.devices:
@@ -51,7 +52,7 @@ class Groups:
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
 
         if scene_address.group not in self.groups.keys():
-            _LOGGER.info(f"Scene {scene_address} not in any group. Ignoring.")
+            _LOGGER.info(f"Scene {scene_address} not in any known group. Ignoring.")
             return
 
         _LOGGER.info(f"Updating devices in scene {scene_address}...")

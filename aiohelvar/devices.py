@@ -78,7 +78,9 @@ class Device:
         return self._get_states["NSLampFailure"]
 
     def set_scene_levels(self, levels: list):
-        self.levels = levels
+        if self.is_load:
+            self.levels = levels
+        
 
     @property
     def is_load(self):
@@ -108,6 +110,9 @@ class Device:
 
     async def set_scene_level(self, scene_address: SceneAddress):
 
+        if not self.is_load:
+            return
+
         level = self.get_level_for_scene(scene_address)
 
         if level == "*" or level is None:
@@ -123,7 +128,7 @@ class Device:
 
     def get_level_for_scene(self, scene_address: SceneAddress):
 
-        if self.levels is None:
+        if self.levels is None or self.is_load:
             return None
 
         try:
