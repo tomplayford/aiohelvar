@@ -102,9 +102,9 @@ class Device:
             level == 100.0
 
         if level == 0 and self.load_level > 0:
-            self.last_load_level = self.load_level
+            self.last_load_level = float(self.load_level)
 
-        self.load_level = level
+        self.load_level = float(level)
 
     async def set_scene_level(self, scene_address: SceneAddress):
 
@@ -183,7 +183,7 @@ class Devices:
         self._update_device_param(address, "state", state)
 
     def update_device_load_level(self, address, load_level):
-        self._update_device_param(address, "load_level", load_level)
+        self._update_device_param(address, "load_level", float(load_level))
 
     def update_device_name(self, address, name):
         self._update_device_param(address, "name", name)
