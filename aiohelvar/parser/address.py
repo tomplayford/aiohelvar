@@ -80,9 +80,9 @@ class SceneAddress:
     def __init__(self, group: int, block: int, scene: int):
         # TODO validate group, block and scene values are in range
 
-        self.group = group
-        self.block = block
-        self.scene = scene
+        self.group = int(group)
+        self.block = int(block)
+        self.scene = int(scene)
 
     def __str__(self):
         return f"@{self.group}.{self.block}.{self.scene}"
@@ -105,4 +105,4 @@ class SceneAddress:
         return self.block * 16 + self.scene
 
     def to_int(self) -> int:
-        return self.group * (8*16) + self.block * 16 + self.scene
+        return self.group * (8 * 16) + self.block * 16 + self.scene

@@ -58,7 +58,7 @@ class Groups:
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
 
         if scene_address.group not in self.groups.keys():
-            _LOGGER.info(f"Scene {scene_address} not in any known group. Ignoring.")
+            _LOGGER.info(f"Scene {scene_address} not in any known group. Looking for {scene_address.group} in {self.groups.keys()}. Ignoring.")
             return
 
         group = self.groups[scene_address.group]
