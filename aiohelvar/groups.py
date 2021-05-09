@@ -64,7 +64,7 @@ class Groups:
         group = self.groups[scene_address.group]
         group.last_scene = scene_address
 
-        _LOGGER.info(f"Updating devices in scene {scene_address}...")
+        _LOGGER.error(f"Updating devices in group {group.name} to scene {scene_address}...")
         for device_address in self.groups[scene_address.group].devices:
             device = self.router.devices.devices.get(device_address)
             if device is None:
