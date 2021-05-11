@@ -21,6 +21,7 @@ class Group:
         self.name = None
         self.devices = []
         self.last_scene = None
+        self.subscriptions = []
 
     def __str__(self):
         return f"Group {self.group_id}: {self.name}. Has {len(self.devices)} devices."
@@ -30,6 +31,17 @@ class Group:
 
     def __eq__(self, o: object) -> bool:
         return self.group_id == o.group_id
+
+    def add_subscriber(self, func):
+        self.subscriptions.append(func)
+
+    def remove_subscriber(self, func):
+        if func in self.subscriptions:
+            self.subscriptions.remove(func)
+
+    async def update_subscribers(self):
+        for sub in self.subscriptions:
+            await asyncio.create_task(sub(self))
 
     def get_levels_for_scene(self, scene_address):
         pass
@@ -55,6 +67,22 @@ class Groups:
     def update_group_device_members(self, group_id: int, addresses):
         self.groups[int(group_id)].devices = addresses
 
+    def unregister_subscription(self, group_id, func):
+        group = self.groups.get(group_id)
+
+        if group:
+            group.remove_subscriber(func)
+            return True
+        return False
+
+    def register_subscription(self, group_id, func):
+        group = self.groups.get(group_id)
+
+        if group:
+            group.add_subscriber(func)
+            return True
+        return False
+
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
 
         if scene_address.group not in self.groups.keys():
@@ -71,6 +99,8 @@ class Groups:
                 _LOGGER.warning(f"Can't find device {device_address} registered in group {scene_address.group}.")
                 continue
             await device.set_scene_level(scene_address)
+
+        await group.update_subscribers()
 
         _LOGGER.info(f"Updated devices in scene {scene_address}.")
 
