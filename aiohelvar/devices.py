@@ -43,6 +43,8 @@ class Device:
         self.protocol = None
         self.type = None
         self.levels = []
+        self.subscriptions = []
+
         if raw_type:
             self.decode_raw_type_bytecode(raw_type)
 
@@ -81,7 +83,21 @@ class Device:
     def set_scene_levels(self, levels: list):
         if self.is_load:
             self.levels = levels
-        
+
+    def add_subscriber(self, func):
+        self.subscriptions.append(func)
+
+    def remove_subscriber(self, func):
+        if func in self.subscriptions:
+            self.subscriptions.remove(func)
+
+    async def update_subscribers(self):
+        for sub in self.subscriptions:
+            await asyncio.create_task(sub(self))
+
+    @property
+    def is_light(self):
+        return self.is_load
 
     @property
     def is_load(self):
@@ -196,6 +212,22 @@ class Devices:
     def update_device_name(self, address, name):
         self._update_device_param(address, "name", name)
 
+    def unregister_subscription(self, device_address, func):
+        device = self.devices.get(device_address)
+
+        if device:
+            device.remove_subscriber(func)
+            return True
+        return False
+
+    def register_subscription(self, device_address, func):
+        device = self.devices.get(device_address)
+
+        if device:
+            device.add_subscriber(func)
+            return True
+        return False
+
     def _update_device_param(self, address, param, value):
         _LOGGER.debug(f"Updating {param} on device {address} to {value}")
         try:
@@ -203,6 +235,9 @@ class Devices:
         except KeyError:
             _LOGGER.warn(f"Couldn't find device with address: {address}")
             raise
+
+    def get_light_devices(self):
+        return [device for device in self.devices.values() if device.is_light is True]
 
     def update_device_scene_level(self, address, scene_levels):
 
@@ -212,7 +247,13 @@ class Devices:
 
         self.devices[address].set_scene_levels(levels)
 
-    async def set_device_load_level(self, address, load_level, fade_time=1000):
+    async def set_device_brightness(self, address, brightness: int, fade_time=1000):
+
+        load_level = f"{(brightness/255):.1f}"
+
+        await self.set_device_load_level(address, load_level, fade_time)
+
+    async def set_device_load_level(self, address, load_level: str, fade_time=1000):
         _LOGGER.info(
             f"Updating device {address} load level to {load_level} over {fade_time}ms..."
         )
