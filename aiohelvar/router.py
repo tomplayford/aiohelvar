@@ -168,8 +168,9 @@ class Router:
 
         while True:
             command_string = await self.commands_to_send.get()
-            _LOGGER.debug(f"found {command_string} to send. Sending...")
+            _LOGGER.info(f"Sending command '{command_string}'...")
             writer.write(command_string)
+            # Small buffer. It's possible to overload a router.
             await asyncio.sleep(0.01)
             await writer.drain()
             self.commands_to_send.task_done()
@@ -197,35 +198,6 @@ class Router:
 
         # Get Scenes
         await self.get_scenes()
-
-        # await self.wait_for_pending_replies()
-
-        # first_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
-        # second_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
-        # third_command = await self.send_command(Command(CommandType.QUERY_ROUTER_TIME))
-        # forth_command = await self.send_command(Command(CommandType.QUERY_GROUPS))
-
-        # first_command.add_done_callback(
-        #     lambda one: print(f"1st command got reply: {one.result()}")
-        # )
-        # second_command.add_done_callback(
-        #     lambda one: print(f"2nd command got reply {one.result()}")
-        # )
-        # third_command.add_done_callback(
-        #     lambda one: print(f"3rd command got reply {one.result()}")
-        # )
-        # forth_command.add_done_callback(
-        #     lambda one: print(f"4th command got reply {one.result()}")
-        # )
-
-        # result = await self.request("get", "")
-
-        # self.config = Config(result["config"], self.request)
-        # self.groups = Groups(result["groups"], self.request)
-        # self.lights = Lights(result["lights"], self.request)
-        # if "scenes" in result:
-        # if "sensors" in result:
-        #     self.sensors = Sensors(result["sensors"], self.request)
 
     async def get_groups(self):
 
