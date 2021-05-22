@@ -259,7 +259,8 @@ class Devices:
         )
 
         async def task(devices, address, load_level):
-            response = await devices.router._send_command_task(
+            # Routers don't seem to respond to these messages.
+            await devices.router._send_command_task(
                 Command(
                     CommandType.DIRECT_LEVEL_DEVICE,
                     [
@@ -270,6 +271,14 @@ class Devices:
                 )
             )
             _LOGGER.debug(f"Updated device {address} load level to {load_level}.")
+
+            devices.update_device_load_level(address, load_level)
+
+            response = await self.router._send_command_task(
+                Command(
+                    CommandType.QUERY_DEVICE_LOAD_LEVEL, command_address=address
+                )
+            )
             devices.update_device_load_level(address, response.result)
 
         asyncio.create_task(task(self, address, load_level))
