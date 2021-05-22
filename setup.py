@@ -7,8 +7,9 @@ setuptools.setup(
     name="aiohelvar",
     version="0.0.1",
     author="Tom Playford",
-    description="Async HelvarNet comms",
+    description="Async HelvarNet communication and control library.",
     long_description=long_description,
+    licence="Apache 2.0",
     long_description_content_type="text/markdown",
     url="https://github.com/tomplayford/aiohelvar",
     project_urls={
@@ -18,7 +19,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-
     packages=["aiohelvar"],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )

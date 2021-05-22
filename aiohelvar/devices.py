@@ -247,13 +247,13 @@ class Devices:
 
         self.devices[address].set_scene_levels(levels)
 
-    async def set_device_brightness(self, address, brightness: int, fade_time=1000):
+    async def set_device_brightness(self, address, brightness: int, fade_time=100):
 
         load_level = f"{(brightness/255):.1f}"
 
         await self.set_device_load_level(address, load_level, fade_time)
 
-    async def set_device_load_level(self, address, load_level: str, fade_time=1000):
+    async def set_device_load_level(self, address, load_level: str, fade_time=100):
         _LOGGER.info(
             f"Updating device {address} load level to {load_level} over {fade_time}ms..."
         )
