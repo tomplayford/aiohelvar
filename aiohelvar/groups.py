@@ -19,6 +19,7 @@ def blockscene_to_block_and_scene(block_scene: int):
 
 class Group(Subscribable):
     def __init__(self, group_id: int, name=None):
+        super(Group, self).__init__()
         self.group_id: int = group_id
         self.name = None
         self.devices = []

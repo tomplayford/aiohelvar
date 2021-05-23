@@ -34,6 +34,8 @@ class Device(Subscribable):
     """
 
     def __init__(self, address: HelvarAddress, raw_type=None, name=None):
+        super(Device, self).__init__()
+
         self.address = address
         self.name = name
         self.state = 0
