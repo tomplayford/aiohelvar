@@ -249,7 +249,7 @@ class Devices:
 
     async def set_device_brightness(self, address, brightness: int, fade_time=100):
 
-        load_level = f"{(brightness/255):.1f}"
+        load_level = f"{((brightness/255)*100):.1f}"
 
         await self.set_device_load_level(address, load_level, fade_time)
 
