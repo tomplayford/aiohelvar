@@ -124,7 +124,7 @@ class Device(Subscribable):
         self.last_scene = scene_address
 
         if level == "*" or level is None:
-            return None
+            return 
 
         if level == "L":
             # Last level before device was powered off.
