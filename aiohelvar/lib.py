@@ -9,8 +9,8 @@ class Subscribable:
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        self.subscriptions = []
         super(Subscribable, self).__init__(*args, **kwargs)
+        self.subscriptions = []
 
     def add_subscriber(self, func):
         self.subscriptions.append(func)
