@@ -136,7 +136,7 @@ class Device(Subscribable):
 
         await self._set_level(level)
 
-        self.update_subscribers()
+        await self.update_subscribers()
 
     def get_level_for_scene(self, scene_address: SceneAddress):
 
@@ -196,14 +196,14 @@ class Devices:
     def register_device(self, device: Device):
         self.devices[device.address] = device
 
-    def update_device_state(self, address, state):
-        self._update_device_param(address, "state", state)
+    async def update_device_state(self, address, state):
+        await self._update_device_param(address, "state", state)
 
-    def update_device_load_level(self, address, load_level):
-        self._update_device_param(address, "load_level", float(load_level))
+    async def update_device_load_level(self, address, load_level):
+        await self._update_device_param(address, "load_level", float(load_level))
 
-    def update_device_name(self, address, name):
-        self._update_device_param(address, "name", name)
+    async def update_device_name(self, address, name):
+        await self._update_device_param(address, "name", name)
 
     def unregister_subscription(self, device_address, func):
         device = self.devices.get(device_address)
@@ -221,11 +221,11 @@ class Devices:
             return True
         return False
 
-    def _update_device_param(self, address, param, value):
+    async def _update_device_param(self, address, param, value):
         _LOGGER.debug(f"Updating {param} on device {address} to {value}")
         try:
             setattr(self.devices[address], param, value)
-            self.devices[address].update_subscribers()
+            await self.devices[address].update_subscribers()
         except KeyError:
             _LOGGER.warn(f"Couldn't find device with address: {address}")
             raise
@@ -266,14 +266,14 @@ class Devices:
             )
             _LOGGER.debug(f"Updated device {address} load level to {load_level}.")
 
-            devices.update_device_load_level(address, load_level)
+            await devices.update_device_load_level(address, load_level)
 
             response = await self.router._send_command_task(
                 Command(
                     CommandType.QUERY_DEVICE_LOAD_LEVEL, command_address=address
                 )
             )
-            devices.update_device_load_level(address, response.result)
+            await devices.update_device_load_level(address, response.result)
 
         asyncio.create_task(task(self, address, load_level))
 
@@ -288,13 +288,13 @@ class Devices:
                     CommandType.QUERY_DEVICE_DESCRIPTION, command_address=device.address
                 )
             )
-            self.update_device_name(device.address, response.result)
+            await self.update_device_name(device.address, response.result)
 
         async def update_state(device):
             response = await self.router._send_command_task(
                 Command(CommandType.QUERY_DEVICE_STATE, command_address=device.address)
             )
-            self.update_device_state(device.address, response.result)
+            await self.update_device_state(device.address, response.result)
 
         async def update_load_level(device):
             response = await self.router._send_command_task(
@@ -302,13 +302,13 @@ class Devices:
                     CommandType.QUERY_DEVICE_LOAD_LEVEL, command_address=device.address
                 )
             )
-            self.update_device_load_level(device.address, response.result)
+            await self.update_device_load_level(device.address, response.result)
 
         async def update_scene_level(device):
             response = await self.router._send_command_task(
                 Command(CommandType.QUERY_SCENE_INFO, command_address=device.address)
             )
-            self.update_device_scene_level(device.address, response.result)
+            await self.update_device_scene_level(device.address, response.result)
 
         asyncio.create_task(update_name(device))
         asyncio.create_task(update_state(device))
