@@ -308,7 +308,7 @@ class Devices:
             response = await self.router._send_command_task(
                 Command(CommandType.QUERY_SCENE_INFO, command_address=device.address)
             )
-            await self.update_device_scene_level(device.address, response.result)
+            self.update_device_scene_level(device.address, response.result)
 
         asyncio.create_task(update_name(device))
         asyncio.create_task(update_state(device))
