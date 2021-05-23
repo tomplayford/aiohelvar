@@ -1,3 +1,4 @@
+from aiohelvar.lib import Subscribable
 from aiohelvar.static import DEFAULT_FADE_TIME
 from aiohelvar.parser.address import HelvarAddress, SceneAddress
 import asyncio
@@ -15,13 +16,13 @@ def blockscene_to_block_and_scene(block_scene: int):
     block = ((block_scene - scene) / 16) + 1
     return block, scene + 1
 
-class Group:
+
+class Group(Subscribable):
     def __init__(self, group_id: int, name=None):
         self.group_id: int = group_id
         self.name = None
         self.devices = []
         self.last_scene = None
-        self.subscriptions = []
 
     def __str__(self):
         return f"Group {self.group_id}: {self.name}. Has {len(self.devices)} devices."
@@ -32,17 +33,6 @@ class Group:
     def __eq__(self, o: object) -> bool:
         return self.group_id == o.group_id
 
-    def add_subscriber(self, func):
-        self.subscriptions.append(func)
-
-    def remove_subscriber(self, func):
-        if func in self.subscriptions:
-            self.subscriptions.remove(func)
-
-    async def update_subscribers(self):
-        for sub in self.subscriptions:
-            await asyncio.create_task(sub(self))
-
     def get_levels_for_scene(self, scene_address):
         pass
         # TODO
@@ -52,6 +42,7 @@ class Group:
         #     levels[device.address] = device.level_for_scene(scene_address)
 
         # return levels
+
 
 class Groups:
     def __init__(self, router):
@@ -92,7 +83,7 @@ class Groups:
         group = self.groups[scene_address.group]
         group.last_scene = scene_address
 
-        _LOGGER.error(f"Updating devices in group {group.name} to scene {scene_address}...")
+        _LOGGER.info(f"Updating devices in group {group.name} to scene {scene_address}...")
         for device_address in self.groups[scene_address.group].devices:
             device = self.router.devices.devices.get(device_address)
             if device is None:

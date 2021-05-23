@@ -1,3 +1,4 @@
+from aiohelvar.lib import Subscribable
 from .static import (
     DALI_TYPES,
     DEVICE_STATE_FLAGS,
@@ -27,7 +28,7 @@ def d_2_h(d):
     return [hex(d >> shift & 0xFF) for shift in [0, 8, 16, 24]]
 
 
-class Device:
+class Device(Subscribable):
     """
     Represents a Helvar device. These map to sensors, drivers, relays etc.
     """
@@ -43,7 +44,6 @@ class Device:
         self.protocol = None
         self.type = None
         self.levels = []
-        self.subscriptions = []
 
         if raw_type:
             self.decode_raw_type_bytecode(raw_type)
@@ -83,17 +83,6 @@ class Device:
     def set_scene_levels(self, levels: list):
         if self.is_load:
             self.levels = levels
-
-    def add_subscriber(self, func):
-        self.subscriptions.append(func)
-
-    def remove_subscriber(self, func):
-        if func in self.subscriptions:
-            self.subscriptions.remove(func)
-
-    async def update_subscribers(self):
-        for sub in self.subscriptions:
-            await asyncio.create_task(sub(self))
 
     @property
     def is_light(self):
@@ -144,6 +133,8 @@ class Device:
             level = float(level)
 
         await self._set_level(level)
+
+        self.update_subscribers()
 
     def get_level_for_scene(self, scene_address: SceneAddress):
 
@@ -232,6 +223,7 @@ class Devices:
         _LOGGER.debug(f"Updating {param} on device {address} to {value}")
         try:
             setattr(self.devices[address], param, value)
+            self.devices[address].update_subscribers()
         except KeyError:
             _LOGGER.warn(f"Couldn't find device with address: {address}")
             raise
