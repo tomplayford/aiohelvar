@@ -134,13 +134,17 @@ class Device(Subscribable):
         else:
             level = float(level)
 
+        _LOGGER.debug(
+            f"Device {self.address} has {len(self.subscriptions)} subscribers, about to update them..."
+        )
+
         await self._set_level(level)
 
         await self.update_subscribers()
 
     def get_level_for_scene(self, scene_address: SceneAddress):
 
-        if self.levels is None or self.is_load:
+        if self.levels is None or not self.is_load:
             return None
 
         try:

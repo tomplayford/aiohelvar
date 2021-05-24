@@ -102,7 +102,7 @@ class SceneAddress:
         return not (self == other)
 
     def to_device_int(self) -> int:
-        return self.block * 16 + self.scene
+        return max(0, self.block - 1) * 16 + self.scene
 
     def to_int(self) -> int:
-        return self.group * (8 * 16) + self.block * 16 + self.scene
+        return self.group * (8 * 16) + max(0, self.block - 1) * 16 + self.scene
