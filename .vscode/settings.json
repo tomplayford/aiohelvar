@@ -2,6 +2,12 @@
     "python.pythonPath": "/usr/local/bin/python3",
     "cornflakes.linter.executablePath": "/usr/local/bin/flake8",
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.testing.pytestArgs": [
+        "aiohelvar"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true
 
 }

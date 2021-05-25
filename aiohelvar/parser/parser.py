@@ -14,7 +14,7 @@ class CommandParser:
 
     raw_command = None
 
-    def parse_command(self, input):
+    def parse_command(self, input: bytes):
 
         input = input.decode()
         r = re.compile(command_regex)

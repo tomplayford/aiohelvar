@@ -1,5 +1,7 @@
 
+
 DEFAULT_FADE_TIME = 50 # ms 
+
 
 PROTOCOL = {
     1: "DALI",

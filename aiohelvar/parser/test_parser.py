@@ -8,11 +8,11 @@ from aiohelvar.parser.address import HelvarAddress
 
 def test_command_parseing_simple():
 
-    command_strings = [">V:2,C:101,G:2#", ">V:2,C:101,G:2,S:3#"]
+    command_strings = [">V:2,C:101,G:2#", ">V:2,C:101,G:2,S:3#", ">V:2,C:101,@1.2.2.22=@2.1.2.77=small light,@1.4.5.6=another light#"]
 
     for command_string in command_strings:
         parser = CommandParser()
-        command = parser.parse_command(command_string)
+        command = parser.parse_command(bytes(command_string, "utf8"))
 
         assert isinstance(command, Command) is True
         assert command != command_string
@@ -26,7 +26,6 @@ def test_basic_command_construction():
     )
 
     assert str(command) == ">V:2,C:101,G:2#"
-
 
 # Address tests
 
