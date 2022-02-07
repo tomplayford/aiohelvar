@@ -19,6 +19,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    packages=["aiohelvar"],
+    packages=["aiohelvar", "aiohelvar.parser"],
     python_requires=">=3.8",
 )
