@@ -329,10 +329,11 @@ async def receive_and_register_devices(router, command):
         _LOGGER.info("No devices found.")
         return
 
-    _LOGGER.info(f"hela resultatet som ska splittas är: {command.result}")
+    if "@" in command.result:
+        _LOGGER.info(f"Not able to split, '{command.result}' does not contain @")
+        return
     device_results = command.result.split(",")
     for device_result in device_results:
-        _LOGGER.info(f"device Resultatet som ska splittas är: {device_result}")
         device_type, device_address = device_result.split("@")
 
         address = copy(command.command_address)
