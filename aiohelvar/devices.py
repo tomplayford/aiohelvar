@@ -329,7 +329,7 @@ async def receive_and_register_devices(router, command):
         _LOGGER.info("No devices found.")
         return
 
-    if "@" in command.result:
+    if "@" not in command.result:
         _LOGGER.info(f"Not able to split, '{command.result}' does not contain @")
         return
     device_results = command.result.split(",")
