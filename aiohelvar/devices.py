@@ -331,6 +331,8 @@ async def receive_and_register_devices(router, command):
 
     device_results = command.result.split(",")
     for device_result in device_results:
+
+        _LOGGER.info(device_result.split("@"))
         device_type, device_address = device_result.split("@")
 
         address = copy(command.command_address)
