@@ -151,7 +151,7 @@ class Router:
                 _LOGGER.info(f" Split line by $  {lines}")
 
                 try:
-                    command = parser.parse_command(line)
+                    command = parser.parse_command(lines)
                 except ParserError as e:
                     _LOGGER.error(f"Exception handling line from router: {e}")
                 except Exception as e:
