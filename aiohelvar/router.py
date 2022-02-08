@@ -240,10 +240,9 @@ class Router:
                             f"Request command {command} triggered an error back from the router: {r_command}."
                         )
 
-                    _LOGGER.info(f"r_command before delete '{self.commands_received}'")
-                    self.commands_received.strip("$")
+                    _LOGGER.info(f"self.commands_received before delete '{self.commands_received}'")
                     self.commands_received.remove(r_command)
-                    _LOGGER.info(f"r_command after delete '{self.commands_received}'")
+                    _LOGGER.info(f"self.commands_received after delete '{self.commands_received}'")
                     return r_command
             return None
 
