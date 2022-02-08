@@ -154,7 +154,8 @@ class Router:
                     raise e
                 else:
                     _LOGGER.info(f"Received the following command: {command}")
-#                    _LOGGER.info(f"Clearing the command from $: {command.translate(None, '$')}")
+                    command = command.replace("$", "")
+                    _LOGGER.info(f"Clearing the command from $: {command}")
 
                     if command.command_type == CommandType.RECALL_SCENE:
                         asyncio.create_task(self.handle_scene_recall(command))
