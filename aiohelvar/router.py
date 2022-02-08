@@ -161,7 +161,6 @@ class Router:
 
                     await self.command_received.acquire()
                     self.commands_received.append(command)
-                    self.commands_received.remove("$")
                     self.command_received.notify_all()
                     self.command_received.release()
 
