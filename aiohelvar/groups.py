@@ -135,9 +135,7 @@ async def get_groups(router):
 
 
         members = [member.strip("@") for member in response.result.split(",")]
-#    if '@' not in command.result:
         _LOGGER.info(f"members is '{members}'")
-#        return
 
         addresses = [HelvarAddress(*member.split(".")) for member in members]
         _LOGGER.info(f"addresses is '{addresses}'")
