@@ -26,7 +26,7 @@ KEEP_ALIVE_PERIOD = 120
 class Router:
     """Control a Helvar Route."""
 
-    def __init__(self, host, port, cluster_id=109, router_id=1):
+    def __init__(self, host, port, cluster_id=0, router_id=1):
         self.host = host
         self.port = port
         self.cluster_id = cluster_id
