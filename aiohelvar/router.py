@@ -150,23 +150,24 @@ class Router:
                 lines = line.split(b'$')
                 _LOGGER.info(f" Split line by $  {lines}")
 
-                try:
-                    command = parser.parse_command(lines)
-                except ParserError as e:
-                    _LOGGER.error(f"Exception handling line from router: {e}")
-                except Exception as e:
-                    raise e
-                else:
-                    _LOGGER.info(f"Received the following command: {command}")
+                for lin in lines:
+                    try:
+                        command = parser.parse_command(lin)
+                    except ParserError as e:
+                        _LOGGER.error(f"Exception handling line from router: {e}")
+                    except Exception as e:
+                        raise e
+                    else:
+                        _LOGGER.info(f"Received the following command: {command}")
 
-                    if command.command_type == CommandType.RECALL_SCENE:
-                        asyncio.create_task(self.handle_scene_recall(command))
-                        continue
+                        if command.command_type == CommandType.RECALL_SCENE:
+                            asyncio.create_task(self.handle_scene_recall(command))
+                            continue
 
-                    await self.command_received.acquire()
-                    self.commands_received.append(command)
-                    self.command_received.notify_all()
-                    self.command_received.release()
+                        await self.command_received.acquire()
+                        self.commands_received.append(command)
+                        self.command_received.notify_all()
+                        self.command_received.release()
 
     async def _stream_writer(self, reader, writer):
 
