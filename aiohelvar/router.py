@@ -240,6 +240,7 @@ class Router:
                             f"Request command {command} triggered an error back from the router: {r_command}."
                         )
 
+                    self.commands_received.remove('$')
                     self.commands_received.remove(r_command)
                     return r_command
             return None
