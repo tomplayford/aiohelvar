@@ -133,14 +133,14 @@ async def get_groups(router):
             )
         )
 
+        if response.result is not None:
+            members = [member.strip("@") for member in response.result.split(",")]
+            _LOGGER.debug(f"members is '{members}'")
 
-        members = [member.strip("@") for member in response.result.split(",")]
-        _LOGGER.debug(f"members is '{members}'")
+            addresses = [HelvarAddress(*member.split(".")) for member in members]
+            _LOGGER.debug(f"addresses is '{addresses}'")
 
-        addresses = [HelvarAddress(*member.split(".")) for member in members]
-        _LOGGER.debug(f"addresses is '{addresses}'")
-
-        router.groups.update_group_device_members(group_id, addresses)
+            router.groups.update_group_device_members(group_id, addresses)
 
     async def update_group_last_scene(router, group_id):
         response = await router._send_command_task(
