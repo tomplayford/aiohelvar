@@ -146,8 +146,9 @@ class Router:
             if line is not None:
 
                 _LOGGER.debug(f"We've received the following from the router: {line}")
-                lines = line.split("$")
-                _LOGGER.info(f" Split line by $  {lines}.")
+
+                lines = line.split(b'$')
+                _LOGGER.info(f" Split line by $  {lines}")
 
                 try:
                     command = parser.parse_command(line)
