@@ -148,7 +148,7 @@ class Router:
                 _LOGGER.debug(f"We've received the following from the router: {line}")
 
                 lines = line.split(b'$')
-                _LOGGER.info(f" Split line by $  {lines}")
+                _LOGGER.debug(f" Split line by $  {lines}")
 
                 for lin in lines:
                     try:
