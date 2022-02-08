@@ -146,6 +146,9 @@ class Router:
             if line is not None:
 
                 _LOGGER.debug(f"We've received the following from the router: {line}")
+                lines = line.split("$")
+                _LOGGER.info(f" Split line by $  {lines}.")
+
                 try:
                     command = parser.parse_command(line)
                 except ParserError as e:
@@ -250,8 +253,6 @@ class Router:
         response = check_for_command_response()
 
         if response:
-            new_list = [s.replace("$", "") for s in response]
-            _LOGGER.info(f" trying to remove $  {new_list}.")
             return response
 
         async with self.command_received:
