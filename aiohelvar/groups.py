@@ -135,10 +135,10 @@ async def get_groups(router):
 
 
         members = [member.strip("@") for member in response.result.split(",")]
-        _LOGGER.info(f"members is '{members}'")
+        _LOGGER.debug(f"members is '{members}'")
 
         addresses = [HelvarAddress(*member.split(".")) for member in members]
-        _LOGGER.info(f"addresses is '{addresses}'")
+        _LOGGER.debug(f"addresses is '{addresses}'")
 
         router.groups.update_group_device_members(group_id, addresses)
 
