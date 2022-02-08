@@ -155,9 +155,6 @@ class Router:
                 else:
                     _LOGGER.info(f"Received the following command: {command}")
 
-                    new_command = [s.replace("$", "") for s in command]
-                    _LOGGER.info(f"New command: {new_command}")
-
                     if command.command_type == CommandType.RECALL_SCENE:
                         asyncio.create_task(self.handle_scene_recall(command))
                         continue
@@ -253,6 +250,8 @@ class Router:
         response = check_for_command_response()
 
         if response:
+            new_list = [s.replace("$", "") for s in response]
+            _LOGGER.info(f" trying to remove $  {new_list}.")
             return response
 
         async with self.command_received:
