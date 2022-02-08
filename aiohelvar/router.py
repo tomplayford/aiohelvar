@@ -154,6 +154,7 @@ class Router:
                     raise e
                 else:
                     _LOGGER.info(f"Received the following command: {command}")
+                    command.remove("$")
 
                     if command.command_type == CommandType.RECALL_SCENE:
                         asyncio.create_task(self.handle_scene_recall(command))
@@ -240,9 +241,7 @@ class Router:
                             f"Request command {command} triggered an error back from the router: {r_command}."
                         )
 
-                    _LOGGER.info(f"self.commands_received before delete '{self.commands_received}'")
                     self.commands_received.remove(r_command)
-                    _LOGGER.info(f"self.commands_received after delete '{self.commands_received}'")
                     return r_command
             return None
 
