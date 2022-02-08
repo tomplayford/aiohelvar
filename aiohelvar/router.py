@@ -148,11 +148,11 @@ class Router:
                 _LOGGER.debug(f"We've received the following from the router: {line}")
 
                 lines = line.split(b'$')
-                _LOGGER.debug(f" Split line by $  {lines}")
+                _LOGGER.debug(f" Split line by $: {lines}")
 
-                for lin in lines:
+                for splitline in lines:
                     try:
-                        command = parser.parse_command(lin)
+                        command = parser.parse_command(splitline)
                     except ParserError as e:
                         _LOGGER.error(f"Exception handling line from router: {e}")
                     except Exception as e:
