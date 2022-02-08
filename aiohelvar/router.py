@@ -10,6 +10,7 @@ from .exceptions import CommandResponseTimeout, ParserError
 import asyncio
 import datetime
 import logging
+import re
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -240,7 +241,7 @@ class Router:
                             f"Request command {command} triggered an error back from the router: {r_command}."
                         )
 
-                    self.commands_received.remove("$")
+                    self.commands_received = re.sub('$', '', self.commands_received)
                     self.commands_received.remove(r_command)
                     return r_command
             return None
