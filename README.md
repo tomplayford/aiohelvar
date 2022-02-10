@@ -4,11 +4,11 @@ Asynchronous Python library to interact with Helvar Routers.
 This library was originally written to support the (work in progress) Helvar Home Assistant integration. 
 
 Features:
-* Manage the async TCP comms well, keeps the connection alive and listens to broadcast messages
-Decode the HelvarNet messages and translates things into Python objects that can easily be further translated into Home Assistant objects
-* Discover and retrieve Devices, Groups & Scenes and and all their properties, state and values.
-* Keep track of device states as scenes and devices change based on notifications from the router.
-* Call the more useful commands to control or read status from the above.
+* Manages the async TCP comms well, keeps the connection alive and listens to broadcast messages
+* Decodes the HelvarNet messages and translates things into Python objects that can easily be further translated into Home Assistant objects
+* Discovers and retrieves Devices, Groups & Scenes and and all their properties, state and values.
+* Keeps track of device states as scenes and devices change based on notifications from the router.
+* Calls the more useful commands to control or read status from the above.
 
 Very much a work in progress. Known TODOS:
 
