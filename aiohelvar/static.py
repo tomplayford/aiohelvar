@@ -1,6 +1,6 @@
 
 
-DEFAULT_FADE_TIME = 50 # ms 
+DEFAULT_FADE_TIME = 50  # ms
 
 
 PROTOCOL = {

@@ -7,7 +7,7 @@ from .command import Command
 import re
 
 
-command_regex = "^(?P<type>[<>?!])V\:(?P<version>\d),C\:(?P<command>\d+),?(?P<params>[^=@#]+)?(?P<address>@[^=#]+)?(=(?P<result>[^#]*))?#?$"
+command_regex = "^(?P<type>[<>?!])V\:(?P<version>\d),C\:(?P<command>\d+),?(?P<params>[^=@#]+)?(?P<address>@[^=#]+)?(=(?P<result>[^#]*))?#?$"   # noqa: W605
 
 
 class CommandParser:

@@ -126,7 +126,7 @@ class Device(Subscribable):
         self.last_scene = scene_address
 
         if level == "*" or level is None:
-            return 
+            return
 
         if level == "L":
             # Last level before device was powered off.
@@ -332,7 +332,7 @@ async def receive_and_register_devices(router, command):
     if '@' not in command.result:
         _LOGGER.info(f"Not able to split, '{command.result}' does not contain @")
         return
-        
+
     device_results = command.result.split(",")
     for device_result in device_results:
         device_type, device_address = device_result.split("@")

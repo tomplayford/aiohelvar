@@ -111,6 +111,7 @@ class Groups:
             )
         )
 
+
 async def get_groups(router):
 
     response = await router._send_command_task(Command(CommandType.QUERY_GROUPS))
@@ -167,4 +168,3 @@ async def get_groups(router):
         asyncio.create_task(update_name(router, group.group_id))
         asyncio.create_task(update_group_devices(router, group.group_id))
         asyncio.create_task(update_group_last_scene(router, group.group_id))
-

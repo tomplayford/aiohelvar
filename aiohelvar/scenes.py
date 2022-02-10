@@ -1,5 +1,5 @@
 from .parser.address import SceneAddress
-from .parser.command import Command, CommandParameter, CommandParameterType, CommandType
+from .parser.command import Command, CommandType
 import logging
 
 _LOGGER = logging.getLogger(__name__)
