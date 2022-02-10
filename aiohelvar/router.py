@@ -148,12 +148,14 @@ class Router:
             line = await reader.readuntil(COMMAND_TERMINATOR)
             if line is not None:
 
-                _LOGGER.debug(f"We've received the following from the router: {line}")
+                _LOGGER.debug(f"Received line: {line}")
 
                 lines = line.split(b"$")
-                _LOGGER.debug(f" Split line by $: {lines}")
+                if len(lines) > 1:
+                    _LOGGER.debug(f"Split line by '$' into {len(lines)} lines")
 
                 for splitline in lines:
+                    _LOGGER.debug(f"Parsing line: {splitline}")
                     try:
                         command = parser.parse_command(splitline)
                     except ParserError as e:
@@ -161,7 +163,7 @@ class Router:
                     except Exception as e:
                         raise e
                     else:
-                        _LOGGER.info(f"Received the following command: {command}")
+                        _LOGGER.info(f"Received command: {command}")
 
                         if command.command_type == CommandType.RECALL_SCENE:
                             asyncio.create_task(self.handle_scene_recall(command))
