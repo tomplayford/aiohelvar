@@ -3,7 +3,11 @@ from .devices import Devices, get_devices
 from .groups import Groups, get_groups
 from .scenes import Scenes, get_scenes
 from .parser.parser import CommandParser
-from .parser.command_type import COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE, CommandType, MessageType
+from .parser.command_type import (
+    COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE,
+    CommandType,
+    MessageType,
+)
 from .parser.command import Command
 from .exceptions import CommandResponseTimeout, ParserError
 import asyncio
@@ -146,7 +150,7 @@ class Router:
 
                 _LOGGER.debug(f"We've received the following from the router: {line}")
 
-                lines = line.split(b'$')
+                lines = line.split(b"$")
                 _LOGGER.debug(f" Split line by $: {lines}")
 
                 for splitline in lines:

@@ -63,7 +63,7 @@ class Device(Subscribable):
 
     @property
     def brightness(self):
-        """ Translate load level to 0-255 brightness value"""
+        """Translate load level to 0-255 brightness value"""
         return int(self.load_level * 2.55)
 
     @property
@@ -92,8 +92,7 @@ class Device(Subscribable):
 
     @property
     def is_load(self):
-        """ Loads can have scene values, and can have load levels set.
-        """
+        """Loads can have scene values, and can have load levels set."""
         if self.protocol == "DALI":
             return True
         if self.protocol == "DIGIDIM":
@@ -150,14 +149,16 @@ class Device(Subscribable):
         try:
             return self.levels[scene_address.to_device_int()]
         except IndexError:
-            _LOGGER.error(f"Couldn't find scene {scene_address} ({scene_address.to_device_int()}) in device {self.address}. Device has {len(self.levels)} known scene levels. ")
+            _LOGGER.error(
+                f"Couldn't find scene {scene_address} ({scene_address.to_device_int()}) in device {self.address}. Device has {len(self.levels)} known scene levels. "
+            )
             raise
 
     def decode_raw_type_bytecode(self, raw_type):
 
         raw_type = int(raw_type)
 
-        if raw_type > (2 ** 32) or raw_type < 0:
+        if raw_type > (2**32) or raw_type < 0:
             raise TypeError
 
         bytes = [raw_type >> shift & 0xFF for shift in [0, 8, 16, 24]]
@@ -273,9 +274,7 @@ class Devices:
             await devices.update_device_load_level(address, load_level)
 
             response = await self.router._send_command_task(
-                Command(
-                    CommandType.QUERY_DEVICE_LOAD_LEVEL, command_address=address
-                )
+                Command(CommandType.QUERY_DEVICE_LOAD_LEVEL, command_address=address)
             )
             await devices.update_device_load_level(address, response.result)
 
@@ -329,7 +328,7 @@ async def receive_and_register_devices(router, command):
         _LOGGER.info("No devices found.")
         return
 
-    if '@' not in command.result:
+    if "@" not in command.result:
         _LOGGER.info(f"Not able to split, '{command.result}' does not contain @")
         return
 

@@ -78,17 +78,23 @@ class Groups:
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
 
         if scene_address.group not in self.groups.keys():
-            _LOGGER.info(f"Scene {scene_address} not in any known group. Looking for {scene_address.group} in {self.groups.keys()}. Ignoring.")
+            _LOGGER.info(
+                f"Scene {scene_address} not in any known group. Looking for {scene_address.group} in {self.groups.keys()}. Ignoring."
+            )
             return
 
         group = self.groups[scene_address.group]
         group.last_scene = scene_address
 
-        _LOGGER.info(f"Updating devices in group {group.name} to scene {scene_address}...")
+        _LOGGER.info(
+            f"Updating devices in group {group.name} to scene {scene_address}..."
+        )
         for device_address in self.groups[scene_address.group].devices:
             device = self.router.devices.devices.get(device_address)
             if device is None:
-                _LOGGER.warning(f"Can't find device {device_address} registered in group {scene_address.group}.")
+                _LOGGER.warning(
+                    f"Can't find device {device_address} registered in group {scene_address.group}."
+                )
                 continue
             await device.set_scene_level(scene_address)
 
@@ -106,7 +112,7 @@ class Groups:
                     CommandParameter(CommandParameterType.GROUP, scene_address.group),
                     CommandParameter(CommandParameterType.BLOCK, scene_address.block),
                     CommandParameter(CommandParameterType.SCENE, scene_address.scene),
-                    CommandParameter(CommandParameterType.FADE_TIME, fade_time)
+                    CommandParameter(CommandParameterType.FADE_TIME, fade_time),
                 ],
             )
         )
@@ -158,7 +164,9 @@ async def get_groups(router):
             _LOGGER.error(f"Unexpected reply to command: {response}")
 
         block_scene = int(response.result)
-        scene_address = SceneAddress(group_id, *blockscene_to_block_and_scene(block_scene))
+        scene_address = SceneAddress(
+            group_id, *blockscene_to_block_and_scene(block_scene)
+        )
         await router.groups.handle_scene_callback(scene_address, 10)
 
     groups = [Group(group_id) for group_id in response.result.split(",")]

@@ -1,5 +1,3 @@
-
-
 DEFAULT_FADE_TIME = 50  # ms
 
 
