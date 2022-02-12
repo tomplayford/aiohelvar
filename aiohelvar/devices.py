@@ -135,7 +135,6 @@ class Device(Subscribable):
 
         await self._set_level(level)
 
-
         _LOGGER.debug(
             f"Device {self.address} has {len(self.subscriptions)} subscribers, about to update them..."
         )
@@ -274,7 +273,7 @@ class Devices:
 
             await devices.update_device_load_level(address, load_level)
 
-            # This is causing a race condition. We should really wait for the 
+            # This is causing a race condition. We should really wait for the
             # the fade to finish.
             # TODO: add a delay == length of transition before calling update.
             # response = await self.router._send_command_task(
