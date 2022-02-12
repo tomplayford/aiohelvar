@@ -19,11 +19,12 @@ class HelvarAddress:
 
     """
 
-    def __init__(self, cluster, router, subnet=None, device=None):
-        self.cluster = cluster
-        self.router = router
+    def __init__(self, cluster: int, router: int, subnet: int = None, device: int = None):
+
         self.subnet = subnet
         self.device = device
+        self.cluster = cluster
+        self.router = router
 
     def __str__(self, separator="."):
         base = f"@{self.cluster}{separator}{self.router}"
@@ -32,6 +33,56 @@ class HelvarAddress:
         if self.device:
             return f"{base}{separator}{self.device}"
         return base
+
+    @property
+    def cluster(self):
+        return self.__cluster
+
+    @cluster.setter
+    def cluster(self, var):
+
+        var = int(var)
+        if 0 > var > 253:
+            raise TypeError("Cluster must be between 1 and 4 or None.")
+        self.__cluster = var
+
+    @property
+    def router(self):
+        return self.__router
+
+    @router.setter
+    def router(self, var):
+
+        var = int(var)
+        if 1 > var > 254:
+            raise TypeError("Router must be between 1 and 4 or None.")
+        self.__router = var
+
+    @property
+    def subnet(self):
+        return self.__subnet
+
+    @subnet.setter
+    def subnet(self, var):
+
+        if var is not None:
+            var = int(var)
+            if 1 > var > 4:
+                raise TypeError("Subnet must be between 1 and 4 or None.")
+        self.__subnet = var
+
+    @property
+    def device(self):
+        return self.__device
+
+    @device.setter
+    def device(self, var):
+
+        if var is not None:
+            var = int(var)
+            if 1 > var > 255:
+                raise TypeError("Device must be between 1 and 255 or None.")
+        self.__device = var
 
     def bus_type(self):
 
@@ -58,7 +109,7 @@ class HelvarAddress:
         return True
 
     def __hash__(self):
-        return hash((self.cluster, self.router, self.subnet, self.device))
+        return hash((int(self.cluster), int(self.router), int(self.subnet), self.device))
 
     def __ne__(self, other):
         return not (self == other)
