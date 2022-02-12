@@ -158,7 +158,6 @@ class SceneAddress:
             raise TypeError("Block must be between 1 and 8.")
         self.__block = var
 
-
     @property
     def scene(self):
         return self.__scene
@@ -170,7 +169,6 @@ class SceneAddress:
         if 1 > var > 16:
             raise TypeError("Scene must be between 1 and 6.")
         self.__scene = var
-
 
     def __str__(self):
         return f"@{self.group}.{self.block}.{self.scene}"

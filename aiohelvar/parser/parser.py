@@ -60,7 +60,9 @@ class CommandParser:
     def parse_address(self, match):
 
         if match.group("address"):
-            return HelvarAddress(*list(map(int, match.group("address").replace("@", "").split("."))))
+            return HelvarAddress(
+                *list(map(int, match.group("address").replace("@", "").split(".")))
+            )
         return None
 
     def parse_params(self, match):

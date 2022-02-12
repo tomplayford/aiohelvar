@@ -54,7 +54,7 @@ def test_helvar_address_non_equality():
 def test_helvar_address_equality_string_int():
 
     a = HelvarAddress(1, 2, 3, 4)
-    b = HelvarAddress('1', '2', '3', '4')
+    b = HelvarAddress("1", "2", "3", "4")
 
     assert a == b, "Address should be equal"
 
