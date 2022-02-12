@@ -12,7 +12,7 @@ setuptools.setup(
     license="Apache 2.0",
     long_description_content_type="text/markdown",
     url="https://github.com/tomplayford/aiohelvar",
-    download_url="https://github.com/tomplayford/aiohelvar/archive/refs/tags/V0.9.0.tar.gz"
+    download_url="https://github.com/tomplayford/aiohelvar/archive/refs/tags/V0.9.1.tar.gz",
     project_urls={
         "Bug Tracker": "https://github.com/tomplayford/aiohelvar/issues",
     },
@@ -22,5 +22,5 @@ setuptools.setup(
     ],
     packages=["aiohelvar", "aiohelvar.parser"],
     python_requires=">=3.8",
-    install_requires = []
+    install_requires=[]
 )
