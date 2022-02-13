@@ -27,7 +27,7 @@ KEEP_ALIVE_PERIOD = 120
 
 
 class Router:
-    """Control a Helvar Route."""
+    """Control a Helvar Router."""
 
     def __init__(self, host, port, cluster_id=0, router_id=1):
         self.host = host
@@ -290,6 +290,9 @@ class Router:
         await self.commands_to_send.put(bytes(string, "utf-8"))
 
     async def handle_scene_recall(self, command: Command):
+        """
+        The only notifications we get on live changes in levels of devices is through scenes.
+        """
 
         scene_address = command.get_scene_address()
         fade_time = command.get_param_value(CommandParameterType.FADE_TIME)

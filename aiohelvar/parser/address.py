@@ -136,9 +136,7 @@ class SceneAddress:
 
     @classmethod
     def fromString(cls, string):
-        return cls(
-            *list(map(int, string.strip(" ").replace("@", "").split(".")))
-        )
+        return cls(*list(map(int, string.strip(" ").replace("@", "").split("."))))
 
     @property
     def group(self):
