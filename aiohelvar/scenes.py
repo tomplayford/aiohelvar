@@ -20,6 +20,7 @@ class Scene:
     def __str__(self) -> str:
         return f"{self.address}: {self.name}"
 
+
 class Scenes:
     def __init__(self, router):
         self.router = router
@@ -31,12 +32,23 @@ class Scenes:
     def update_scene_name(self, scene_address, name):
         self.scenes[scene_address].name = name
 
-    def get_scenes_for_group(self, group_id, filter_only_named=True):
+    def get_scene(self, scene_address):
+        return self.scenes[scene_address]
 
-        scenes = [scene for scene in self.scenes.values() if scene.address.group == group_id]
-        if filter_only_named:
-            return [scene for scene in scenes if scene.name is not None]
-        return scenes
+    def get_scenes_for_group(self, group_id: int, only_named=True):
+
+        _LOGGER.info(f"There are {len(self.scenes.values())} registered scenes. We are looking for scenes with group {group_id}.")
+
+        named_scenes = [scene for scene in self.scenes.values() if scene.address.group == int(group_id) and scene.name is not None]
+        named_scenes.sort(key=lambda x: x.name, reverse=False)
+
+        if only_named:
+            return named_scenes
+
+        unnamed_scenes = [scene for scene in self.scenes.values() if scene.address.group == int(group_id) and scene.name is None]
+        unnamed_scenes.sort(key=lambda x: str(x.address), reverse=False)
+
+        return named_scenes + unnamed_scenes
 
 
 async def get_scenes(router, groups):

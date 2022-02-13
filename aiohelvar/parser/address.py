@@ -134,6 +134,12 @@ class SceneAddress:
         self.block = block
         self.scene = scene
 
+    @classmethod
+    def fromString(cls, string):
+        return cls(
+            *list(map(int, string.strip(" ").replace("@", "").split(".")))
+        )
+
     @property
     def group(self):
         return self.__group

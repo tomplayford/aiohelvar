@@ -23,7 +23,7 @@ class Group(Subscribable):
         self.group_id: int = group_id
         self.name = None
         self.devices = []
-        self.last_scene = None
+        self.last_scene_address = None
 
     def __str__(self):
         return f"Group {self.group_id}: {self.name}. Has {len(self.devices)} devices."
@@ -33,6 +33,9 @@ class Group(Subscribable):
 
     def __eq__(self, o: object) -> bool:
         return self.group_id == o.group_id
+
+    def get_last_scene_address(self):
+        return self.last_scene_address
 
     def get_levels_for_scene(self, scene_address):
         pass
@@ -67,16 +70,21 @@ class Groups:
             return True
         return False
 
-    def register_subscription(self, group_id, func):
-        group = self.groups.get(group_id)
+    def register_subscription(self, group_id: int, func):
+
+        group = self.groups.get(int(group_id))
 
         if group:
             group.add_subscriber(func)
             return True
         return False
 
-    def get_scenes_for_group(self, group_id, filter_only_named=True):
-        return self.router.scenes.get_scenes_for_group(group_id, filter_only_named)
+    def get_scenes_for_group(self, group_id, only_named=True):
+        return self.router.scenes.get_scenes_for_group(group_id, only_named)
+
+    async def force_update_groups(self):
+        """ Force subscription updates for all groups"""
+        [await group.update_subscribers() for group in self.groups.values()]
 
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
 
@@ -87,7 +95,7 @@ class Groups:
             return
 
         group = self.groups[scene_address.group]
-        group.last_scene = scene_address
+        group.last_scene_address = scene_address
 
         _LOGGER.info(
             f"Updating devices in group {group.name} to scene {scene_address}..."
@@ -106,7 +114,13 @@ class Groups:
         _LOGGER.info(f"Updated devices in scene {scene_address}.")
 
     async def set_scene(self, scene_address: SceneAddress, fade_time=DEFAULT_FADE_TIME):
-        """Set the scene with the router, we'll get a callback that well use to update device state."""
+        """
+        Set the scene with the router.
+
+        We'll get a scene change callback from the router that well use to update device state,
+        so no need to call one here.
+
+        """
 
         await self.router.send_command(
             Command(

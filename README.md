@@ -14,6 +14,7 @@ Very much a work in progress. Known TODOS:
 
 * Cluster support - we assume cluster 0 at the moment
 * Sensor support
+* Support relative changes to scene levels update commands
 * Better test coverage
 
 ## (Some of the) Known limitations 
@@ -33,7 +34,19 @@ Open to better suggestions!
 We receive notifications when group scenes change, and since we know device levels for every scene, we can update devices levels without polling devices. 
 
 However, we don't get notified when individual devices change their load. This shouldn't be an issue for most setups, as Helvar is scene oriented, and almost every happens that way. 
+
+We also receive notifications when there are relative changes to scene levels, but we don't currently support those commands. 
+
 If you're having trouble here, I suggest we implement a device polling option that can be enabled. 
+
+### Router doesn't report decimal scene levels
+
+If you set scene levels to a decimal, rather than an int. (e.g. 0.2 or 54.6). The only command available to retrieve scene levels only
+returns the integer. 
+
+The only time this is really a problem on dim scenes where a value of 0.25 would show light, but the command is reporting off. 
+
+We get round this by polling all devices manually if we think they've been updated by a scene. Don't like it. 
 
 ### Colour changing loads.
 
@@ -44,7 +57,8 @@ The HelvarNET docs don't mention how it's supported.
 
 ## Requests to Helvar :)
 
-* Please provide a command to retrieve a device's GTIN and serial number.
+* Please provide a command to retrieve a device's GTIN and / or serial number.
+* Please provide a command to retrieve full decimal values of a scene table.
 
 ## Disclaimer
 

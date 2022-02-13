@@ -53,9 +53,6 @@ class Router:
         self.connected = False
 
         self.workgroup_name = None
-        # self.capabilities = None
-        # self.rules = None
-        # self.schedules = None
 
     @property
     def id(self):
@@ -208,6 +205,9 @@ class Router:
 
         # Get Scenes
         await self.get_scenes()
+
+        # Update group scenes
+        await self.groups.force_update_groups()
 
     async def get_groups(self):
 
