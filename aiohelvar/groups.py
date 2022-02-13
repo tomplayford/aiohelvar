@@ -75,6 +75,9 @@ class Groups:
             return True
         return False
 
+    def get_scenes_for_group(self, group_id, filter_only_named=True):
+        return self.router.scenes.get_scenes_for_group(group_id, filter_only_named)
+
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
 
         if scene_address.group not in self.groups.keys():

@@ -6,7 +6,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Scene:
-    def __init__(self, scene_address, levels=None, name=None):
+    def __init__(self, scene_address: SceneAddress, levels=None, name=None):
         self.name = name
         self.levels = levels
         self.address = scene_address
@@ -18,8 +18,7 @@ class Scene:
         return hash(self.address)
 
     def __str__(self) -> str:
-        return f"Scene: {self.address} {self.name}"
-
+        return f"{self.address}: {self.name}"
 
 class Scenes:
     def __init__(self, router):
@@ -31,6 +30,13 @@ class Scenes:
 
     def update_scene_name(self, scene_address, name):
         self.scenes[scene_address].name = name
+
+    def get_scenes_for_group(self, group_id, filter_only_named=True):
+
+        scenes = [scene for scene in self.scenes.values() if scene.address.group == group_id]
+        if filter_only_named:
+            return [scene for scene in scenes if scene.name is not None]
+        return scenes
 
 
 async def get_scenes(router, groups):
