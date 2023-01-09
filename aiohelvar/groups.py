@@ -186,6 +186,14 @@ async def get_groups(router):
         )
         await router.groups.handle_scene_callback(scene_address, 10)
 
+    if not response.result:
+        _LOGGER.debug(
+            "Response to QUERY_GROUPS command was empty. Assuming no groups defined."
+        )
+        return
+
+    # TODO: Validate input - Regex for comma separated ints would do
+
     groups = [Group(group_id) for group_id in response.result.split(",")]
 
     for group in groups:
