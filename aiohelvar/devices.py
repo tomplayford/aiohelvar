@@ -158,7 +158,7 @@ class Device(Subscribable):
 
         raw_type = int(raw_type)
 
-        if raw_type > (2 ** 32) or raw_type < 0:
+        if raw_type > (2**32) or raw_type < 0:
             raise TypeError
 
         bytes = [raw_type >> shift & 0xFF for shift in [0, 8, 16, 24]]
