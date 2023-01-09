@@ -83,7 +83,7 @@ class Groups:
         return self.router.scenes.get_scenes_for_group(group_id, only_named)
 
     async def force_update_groups(self):
-        """ Force subscription updates for all groups"""
+        """Force subscription updates for all groups"""
         [await group.update_subscribers() for group in self.groups.values()]
 
     async def handle_scene_callback(self, scene_address: SceneAddress, fade_time):
