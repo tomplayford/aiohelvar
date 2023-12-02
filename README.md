@@ -1,7 +1,7 @@
 # aiohelvar
 Asynchronous Python library to interact with Helvar Routers.
 
-This library was originally written to support the (work in progress) Helvar Home Assistant integration. 
+This library written to support the (work in progress) [Helvar HomeAssistant integration](https://github.com/tomplayford/homeassistant_helvar/). 
 
 Features:
 * Manages the async TCP comms well, keeps the connection alive and listens to broadcast messages
