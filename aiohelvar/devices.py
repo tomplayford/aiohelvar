@@ -68,19 +68,19 @@ class Device(Subscribable):
 
     @property
     def is_disabled(self):
-        return self._get_states["NSDisabled"]
+        return self._get_states()["NSDisabled"]
 
     @property
     def is_missing(self):
-        return self._get_states["NSMissing"]
+        return self._get_states()["NSMissing"]
 
     @property
     def is_faulty(self):
-        return self._get_states["NSFaulty"]
+        return self._get_states()["NSFaulty"]
 
     @property
     def is_lamp_failure(self):
-        return self._get_states["NSLampFailure"]
+        return self._get_states()["NSLampFailure"]
 
     def set_scene_levels(self, levels: list):
         if self.is_load:
@@ -96,7 +96,9 @@ class Device(Subscribable):
         if self.protocol == "DALI":
             return True
         if self.protocol == "DIGIDIM":
-            return self.type.is_load
+            if self.type:
+                return self.type.is_load
+            return False
 
         else:
             return True
@@ -108,7 +110,7 @@ class Device(Subscribable):
         if level < 0:
             level = 0.0
         if level > 100:
-            level == 100.0
+            level = 100.0
 
         if level == 0 and self.load_level > 0:
             self.last_load_level = float(self.load_level)
@@ -264,7 +266,7 @@ class Devices:
                     CommandType.DIRECT_LEVEL_DEVICE,
                     [
                         CommandParameter(CommandParameterType.LEVEL, load_level),
-                        CommandParameter(CommandParameterType.FADE_TIME, fade_time),
+                        CommandParameter(CommandParameterType.FADE_TIME, str(fade_time)),
                     ],
                     command_address=address,
                 )

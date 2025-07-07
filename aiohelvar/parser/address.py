@@ -42,7 +42,7 @@ class HelvarAddress:
     def block(self, var):
 
         var = int(var)
-        if 0 > var > 253:
+        if var < 0 or var > 253:
             raise TypeError("Block must be between 1 and 4.")
         self.__block = var
 
@@ -54,7 +54,7 @@ class HelvarAddress:
     def router(self, var):
 
         var = int(var)
-        if 1 > var > 254:
+        if var < 1 or var > 254:
             raise TypeError("Router must be between 1 and 4.")
         self.__router = var
 
@@ -67,7 +67,7 @@ class HelvarAddress:
 
         if var is not None:
             var = int(var)
-            if 1 > var > 4:
+            if var < 1 or var > 4:
                 raise TypeError("Subnet must be between 1 and 4 or None.")
         self.__subnet = var
 
@@ -80,7 +80,7 @@ class HelvarAddress:
 
         if var is not None:
             var = int(var)
-            if 1 > var > 255:
+            if var < 1 or var > 255:
                 raise TypeError("Device must be between 1 and 255 or None.")
         self.__device = var
 
@@ -146,7 +146,7 @@ class SceneAddress:
     def group(self, var):
 
         var = int(var)
-        if 0 > var > 128:
+        if var < 0 or var > 128:
             raise TypeError("Group must be between 0 and 128.")
         self.__group = var
 
@@ -158,7 +158,7 @@ class SceneAddress:
     def block(self, var):
 
         var = int(var)
-        if 1 > var > 8:
+        if var < 1 or var > 8:
             raise TypeError("Block must be between 1 and 8.")
         self.__block = var
 
@@ -170,8 +170,8 @@ class SceneAddress:
     def scene(self, var):
 
         var = int(var)
-        if 1 > var > 16:
-            raise TypeError("Scene must be between 1 and 6.")
+        if var < 1 or var > 16:
+            raise TypeError("Scene must be between 1 and 16.")
         self.__scene = var
 
     def __str__(self):
