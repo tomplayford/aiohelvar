@@ -181,7 +181,8 @@ class SceneAddress:
         return hash((self.group, self.block, self.scene))
 
     def __eq__(self, other):
-
+        if not isinstance(other, SceneAddress):
+            return False
         return (self.group, self.block, self.scene) == (
             other.group,
             other.block,

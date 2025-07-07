@@ -30,10 +30,37 @@ class Scenes:
         self.scenes[scene_address] = scene
 
     def update_scene_name(self, scene_address, name):
-        self.scenes[scene_address].name = name
+        try:
+            self.scenes[scene_address].name = name
+        except KeyError:
+            _LOGGER.error(
+                f"Cannot update scene name: Scene not found {scene_address} "
+                f"(group={scene_address.group}, block={scene_address.block}, scene={scene_address.scene}). "
+                f"Available scenes: {list(self.scenes.keys())}"
+            )
 
     def get_scene(self, scene_address):
-        return self.scenes[scene_address]
+        try:
+            return self.scenes[scene_address]
+        except KeyError:
+            
+            _LOGGER.error(
+                f"Scene not found: {scene_address} (group={scene_address.group}, "
+                f"block={scene_address.block}, scene={scene_address.scene}). "
+                f"Available scenes: {[(str(addr), hash(addr)) for addr in self.scenes.keys()]}"
+            )
+            return None
+
+    def has_scene(self, scene_address):
+        """Check if a scene exists"""
+        return scene_address in self.scenes
+
+    def get_scene_safe(self, scene_address, default=None):
+        """Get scene with default fallback"""
+        try:
+            return self.scenes[scene_address]
+        except KeyError:
+            return default
 
     def get_scenes_for_group(self, group_id: int, only_named=True):
 

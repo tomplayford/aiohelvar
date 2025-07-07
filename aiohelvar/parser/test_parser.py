@@ -448,3 +448,36 @@ def test_unicode_handling():
     except Exception:
         # Unicode handling may not be supported
         pass
+
+
+def test_scene_address_as_dict_key():
+    """Test SceneAddress can be used as dictionary key"""
+    # Create test addresses
+    addr1 = SceneAddress(1, 2, 3)
+    addr2 = SceneAddress(1, 2, 3)  # Same values
+    addr3 = SceneAddress(1, 2, 4)  # Different scene
+    
+    # Test in dictionary
+    scenes_dict = {}
+    scenes_dict[addr1] = "scene1"
+    
+    # Should be able to retrieve with equivalent address
+    assert addr2 in scenes_dict, "Equivalent SceneAddress should be found in dict"
+    assert scenes_dict[addr2] == "scene1", "Should retrieve same value"
+    
+    # Different address should not be found
+    assert addr3 not in scenes_dict, "Different SceneAddress should not be found"
+    
+    # Test hash consistency
+    assert hash(addr1) == hash(addr2), "Equal addresses should have same hash"
+    assert hash(addr1) != hash(addr3), "Different addresses should have different hash"
+
+
+def test_scene_address_type_consistency():
+    """Test SceneAddress type handling in comparisons"""
+    addr = SceneAddress(1, 2, 3)
+    
+    # Should not equal non-SceneAddress objects
+    assert addr != "not_an_address", "Should not equal string"
+    assert addr != (1, 2, 3), "Should not equal tuple"
+    assert addr != None, "Should not equal None"
