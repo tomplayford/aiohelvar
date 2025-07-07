@@ -12,7 +12,7 @@ setuptools.setup(
     license="Apache 2.0",
     long_description_content_type="text/markdown",
     url="https://github.com/tomplayford/aiohelvar",
-    download_url="https://github.com/tomplayford/aiohelvar/archive/refs/tags/V0.9.3.tar.gz",
+    download_url="https://github.com/tomplayford/aiohelvar/archive/refs/tags/V0.9.4.tar.gz",
     project_urls={
         "Bug Tracker": "https://github.com/tomplayford/aiohelvar/issues",
     },
