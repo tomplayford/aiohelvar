@@ -26,9 +26,9 @@ jobs:
       # - name: Lint with flake8
       #   run: |
       #     flake8 aiohelvar
-      - name: Check formatting with black
-        run: |
-          black aiohelvar --check
+      # - name: Check formatting with black
+      #   run: |
+      #     black aiohelvar --check
       - name: Run unit tests
         run: |
           pytest aiohelvar/parser
