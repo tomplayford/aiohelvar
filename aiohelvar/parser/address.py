@@ -19,7 +19,7 @@ class HelvarAddress:
 
     """
 
-    def __init__(self, block: int, router: int, subnet: int = None, device: int = None):
+    def __init__(self, block: int, router: int, subnet = None, device = None):
 
         self.subnet = subnet
         self.device = device
@@ -109,7 +109,7 @@ class HelvarAddress:
         return True
 
     def __hash__(self):
-        return hash((int(self.block), int(self.router), int(self.subnet), self.device))
+        return hash((int(self.block), int(self.router), int(self.subnet) if self.subnet is not None else None, self.device))
 
     def __ne__(self, other):
         return not (self == other)

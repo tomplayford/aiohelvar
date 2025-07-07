@@ -45,12 +45,16 @@ async def main():
     for key, value in router.scenes.scenes.items():
         print(f"    {value}")
 
-    device_to_flash = list(router.devices.devices.values())[0]
-
-    # flash a load on for 10s
-    await router.devices.set_device_load_level(device_to_flash.address, 95.2, 100)
-    await asyncio.sleep(10)
-    await router.devices.set_device_load_level(device_to_flash.address, 0.0, 100)
+    devices = list(router.devices.devices.values())
+    if devices:
+        device_to_flash = devices[0]
+        
+        # flash a load on for 10s
+        await router.devices.set_device_load_level(device_to_flash.address, 95.2, 100)
+        await asyncio.sleep(10)
+        await router.devices.set_device_load_level(device_to_flash.address, 0.0, 100)
+    else:
+        print("No devices found to flash")
 
     # flash a load on for 10s
     await router.devices.set_device_load_level(device_address_to_flash, 95.2, 100)

@@ -60,9 +60,13 @@ class CommandParser:
     def parse_address(self, match):
 
         if match.group("address"):
-            return HelvarAddress(
-                *list(map(int, match.group("address").replace("@", "").split(".")))
-            )
+            try:
+                return HelvarAddress(
+                    *list(map(int, match.group("address").replace("@", "").split(".")))
+                )
+            except ValueError as e:
+                _LOGGER.error(f"Invalid address format: {match.group('address')}")
+                return None
         return None
 
     def parse_params(self, match):

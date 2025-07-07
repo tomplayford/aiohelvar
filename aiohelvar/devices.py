@@ -339,7 +339,11 @@ async def receive_and_register_devices(router, command):
 
     device_results = command.result.split(",")
     for device_result in device_results:
-        device_type, device_address = device_result.split("@")
+        parts = device_result.split("@")
+        if len(parts) != 2:
+            _LOGGER.warning(f"Invalid device result format: {device_result}")
+            continue
+        device_type, device_address = parts
 
         address = copy(command.command_address)
         address.device = device_address

@@ -77,10 +77,13 @@ async def get_scenes(router, groups):
         sub_parts = part.split(":")
 
         try:
+            if len(sub_parts) < 2:
+                _LOGGER.warning(f"Invalid scene part format: {part}")
+                continue
             scene_address = SceneAddress(*[int(a) for a in sub_parts[0].split(".")])
             router.scenes.update_scene_name(scene_address, sub_parts[1])
-        except KeyError:
-            _LOGGER.error(f"Unknown scene address {part}")
+        except (KeyError, ValueError, IndexError) as e:
+            _LOGGER.error(f"Error parsing scene address {part}: {e}")
 
     # [router.scenes.register_scene(scene.address, scene) for scene in scenes]
 
