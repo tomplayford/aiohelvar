@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="aiohelvar",
-    version="0.9.3",
+    version="0.9.4",
     author="Tom Playford",
     description="Async HelvarNet communication and control library.",
     long_description=long_description,
