@@ -481,3 +481,44 @@ def test_scene_address_type_consistency():
     assert addr != "not_an_address", "Should not equal string"
     assert addr != (1, 2, 3), "Should not equal tuple"
     assert addr != None, "Should not equal None"
+
+
+def test_scenes_none_response_handling():
+    """Test that scenes.py handles None response.result gracefully"""
+    from aiohelvar.scenes import Scenes
+    from aiohelvar.groups import Groups
+    
+    # Create a mock response with None result
+    class MockResponse:
+        def __init__(self, result=None):
+            self.result = result
+    
+    class MockRouter:
+        def __init__(self):
+            self.scenes = Scenes(self)
+            self.groups = Groups(self)
+        
+        async def _send_command_task(self, command):
+            return MockResponse(None)  # Simulate None response
+    
+    # Test should not raise AttributeError
+    import asyncio
+    
+    async def test_async():
+        from aiohelvar.scenes import get_scenes
+        router = MockRouter()
+        
+        # Add a mock group to avoid empty groups
+        from aiohelvar.groups import Group
+        router.groups.register_group(Group("1"))
+        
+        # This should not raise an AttributeError
+        try:
+            await get_scenes(router, router.groups)
+            return True
+        except AttributeError:
+            return False
+    
+    # Run the async test
+    result = asyncio.run(test_async())
+    assert result == True, "get_scenes should handle None response.result without AttributeError"

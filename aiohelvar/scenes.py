@@ -98,9 +98,20 @@ async def get_scenes(router, groups):
                 scene = Scene(SceneAddress(int(group.group_id), int(block), int(scene)))
                 router.scenes.register_scene(scene.address, scene)
 
-    parts = response.result.strip("@").split("@")
+    # Check if response.result is None or empty
+    if not response or not response.result:
+        _LOGGER.warning("No scene names returned from router")
+        return
+
+    try:
+        parts = response.result.strip("@").split("@")
+    except AttributeError:
+        _LOGGER.error("Response result is not a string - cannot parse scene names, no scenes added.")
+        return
 
     for part in parts:
+        if not part.strip():  # Skip empty parts
+            continue
         sub_parts = part.split(":")
 
         try:
