@@ -522,3 +522,5 @@ def test_scenes_none_response_handling():
     # Run the async test
     result = asyncio.run(test_async())
     assert result == True, "get_scenes should handle None response.result without AttributeError"
+
+

@@ -94,7 +94,10 @@ class Groups:
             )
             return
 
-        group = self.groups[scene_address.group]
+        group = self.groups.get(scene_address.group)
+        if not group:
+            _LOGGER.error(f"Group {scene_address.group} not found for scene {scene_address}")
+            return
         group.last_scene_address = scene_address
 
         _LOGGER.info(
@@ -180,7 +183,11 @@ async def get_groups(router):
                 return
             _LOGGER.error(f"Unexpected reply to command: {response}")
 
-        block_scene = int(response.result)
+        try:
+            block_scene = int(response.result)
+        except (ValueError, TypeError):
+            _LOGGER.error(f"Invalid block_scene value: {response.result}")
+            return
         scene_address = SceneAddress(
             group_id, *blockscene_to_block_and_scene(block_scene)
         )
@@ -194,7 +201,21 @@ async def get_groups(router):
 
     # TODO: Validate input - Regex for comma separated ints would do
 
-    groups = [Group(group_id) for group_id in response.result.split(",")]
+    try:
+        group_ids = response.result.split(",")
+        groups = []
+        for group_id in group_ids:
+            group_id = group_id.strip()
+            if group_id:  # Skip empty strings
+                try:
+                    # Validate that group_id is numeric
+                    int(group_id)
+                    groups.append(Group(group_id))
+                except ValueError:
+                    _LOGGER.warning(f"Invalid group ID: {group_id}")
+    except AttributeError:
+        _LOGGER.error("Response result is not a string - cannot parse groups")
+        return
 
     for group in groups:
         router.groups.register_group(group)

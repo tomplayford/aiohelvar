@@ -133,7 +133,11 @@ class Device(Subscribable):
             # Last level before device was powered off.
             level = self.last_load_level
         else:
-            level = float(level)
+            try:
+                level = float(level)
+            except (ValueError, TypeError):
+                _LOGGER.error(f"Invalid level value: {level}")
+                return
 
         await self._set_level(level)
 
@@ -157,8 +161,11 @@ class Device(Subscribable):
             raise
 
     def decode_raw_type_bytecode(self, raw_type):
-
-        raw_type = int(raw_type)
+        try:
+            raw_type = int(raw_type)
+        except (ValueError, TypeError):
+            _LOGGER.error(f"Invalid raw_type value: {raw_type}")
+            return
 
         if raw_type > (2**32) or raw_type < 0:
             raise TypeError
@@ -177,6 +184,10 @@ class Device(Subscribable):
 
         if self.protocol == "DALI":
             try:
+                if len(bytes) < 2:
+                    _LOGGER.error(f"Insufficient bytes for DALI type: {len(bytes)}")
+                    self.type = UNKNOWN_DALI_TYPE
+                    return
                 self.type = DALI_TYPES[bytes[1]]
             except KeyError:
                 _LOGGER.error(
@@ -185,6 +196,10 @@ class Device(Subscribable):
                 self.type = UNKNOWN_DALI_TYPE
         if self.protocol == "DIGIDIM":
             try:
+                if len(bytes) < 4:
+                    _LOGGER.error(f"Insufficient bytes for DIGIDIM type: {len(bytes)}")
+                    self.type = DigidimType("0", UNKNOWN_DIGIDIM_TYPE, False)
+                    return
                 self.type = DIGIDIM_TYPES[(h_2_d(*bytes[:-4:-1]))]
             except KeyError:
                 _LOGGER.error(
