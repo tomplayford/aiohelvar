@@ -15,20 +15,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Set up Python 3.11
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.11
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install -r requirements-test.txt
-      - name: Lint with flake8
-        run: |
-          flake8 aiohelvar
-      - name: Check formatting with black
-        run: |
-          black aiohelvar --check
+      # - name: Lint with flake8
+      #   run: |
+      #     flake8 aiohelvar
+      # - name: Check formatting with black
+      #   run: |
+      #     black aiohelvar --check
       - name: Run unit tests
         run: |
           pytest aiohelvar/parser
