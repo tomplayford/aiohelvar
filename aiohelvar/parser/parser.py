@@ -5,6 +5,9 @@ from .command_parameter import CommandParameter, CommandParameterType
 from .command import Command
 
 import re
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 command_regex = r"^(?P<type>[<>?!])V\:(?P<version>\d),C\:(?P<command>\d+),?(?P<params>[^=@#]+)?(?P<address>@[^=#]+)?(=(?P<result>[^#]*))?#?$"
