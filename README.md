@@ -70,4 +70,22 @@ The authors of this software provide no support, guarantees, or warranty for its
 
 This software is licensed under the Apache License 2.0. See the LICENCE file for more details. 
 
+## Development
+
+### Installing Test Dependencies
+
+To run tests, you need to install the test dependencies:
+
+```bash
+pip install -r requirements-test.txt
+```
+
+### Running Tests
+
+Run all tests:
+
+```bash
+python3 -m pytest
+```
+
 
