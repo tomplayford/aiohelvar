@@ -13,6 +13,7 @@ from .exceptions import CommandResponseTimeout, ParserError
 import asyncio
 import datetime
 import logging
+import ipaddress
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,11 +30,35 @@ KEEP_ALIVE_PERIOD = 120
 class Router:
     """Control a Helvar Router."""
 
-    def __init__(self, host, port, cluster_id=0, router_id=1):
+    def __init__(self, host, port, cluster_id=0, router_id=1, use_specified_ids=False):
         self.host = host
         self.port = port
-        self.cluster_id = cluster_id
-        self.router_id = router_id
+        
+        # Check if we should use specified IDs or extract from IP address
+        if use_specified_ids:
+            # Use the provided cluster_id and router_id values
+            _LOGGER.debug(f"Using specified IDs: cluster_id={cluster_id}, router_id={router_id}")
+            self.cluster_id = cluster_id
+            self.router_id = router_id
+        else:
+            # Check if host is a valid IP address and extract cluster_id and router_id
+            try:
+                ip = ipaddress.ip_address(host)
+                if isinstance(ip, ipaddress.IPv4Address):
+                    octets = str(ip).split('.')
+                    self.cluster_id = int(octets[2])  # 3rd octet
+                    self.router_id = int(octets[3])   # 4th octet
+                    _LOGGER.debug(f"Extracted IDs from IPv4 address {host}: cluster_id={self.cluster_id}, router_id={self.router_id}")
+                else:
+                    # For IPv6 or if we can't parse octets, use provided values
+                    _LOGGER.debug(f"IPv6 address {host} detected, using provided values: cluster_id={cluster_id}, router_id={router_id}")
+                    self.cluster_id = cluster_id
+                    self.router_id = router_id
+            except ValueError:
+                # Not a valid IP address, use provided values
+                _LOGGER.debug(f"Invalid IP address '{host}', using provided values: cluster_id={cluster_id}, router_id={router_id}")
+                self.cluster_id = cluster_id
+                self.router_id = router_id
 
         self.config = None
 
