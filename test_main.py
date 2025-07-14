@@ -16,6 +16,7 @@ Tests cover:
 import asyncio
 import logging
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
+import pytest
 
 # Import aiohelvar components
 from aiohelvar.exceptions import Error, ParserError, UnrecognizedCommand, CommandResponseTimeout
@@ -119,6 +120,7 @@ class TestSubscribable:
         sub.remove_subscriber(callback1)  # Should not raise error
         assert len(sub.subscriptions) == 1
     
+    @pytest.mark.asyncio
     async def test_update_subscribers(self):
         """Test updating subscribers"""
         sub = Subscribable()
@@ -215,6 +217,7 @@ class TestDevice:
         device.protocol = "S-DIM"
         assert device.is_load == True
     
+    @pytest.mark.asyncio
     async def test_device_set_level_validation(self):
         """Test device level setting with validation"""
         address = HelvarAddress(1, 2, 3, 4)
@@ -282,6 +285,7 @@ class TestDevices:
         assert address in devices.devices
         assert devices.devices[address] == device
     
+    @pytest.mark.asyncio
     async def test_update_device_load_level(self):
         """Test updating device load level"""
         mock_router = Mock()
@@ -295,6 +299,7 @@ class TestDevices:
         await devices.update_device_load_level(address, 75.5)
         assert device.load_level == 75.5
     
+    @pytest.mark.asyncio
     async def test_set_device_load_level(self):
         """Test setting device load level with command"""
         mock_router = Mock()
@@ -554,6 +559,7 @@ class TestStaticUtilities:
 class TestIntegration:
     """Test integration scenarios and complex workflows"""
     
+    @pytest.mark.asyncio
     async def test_device_subscription_workflow(self):
         """Test complete device subscription workflow"""
         # Create mock router
@@ -585,6 +591,7 @@ class TestIntegration:
         
         assert subscriber_called == True
     
+    @pytest.mark.asyncio
     async def test_group_scene_workflow(self):
         """Test group and scene interaction workflow"""
         # Create mock router
