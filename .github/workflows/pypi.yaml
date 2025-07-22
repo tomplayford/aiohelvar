@@ -6,7 +6,8 @@ jobs:
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
-
+    environment:
+      name: pypi
     steps:
     - uses: actions/checkout@v4
       with:
