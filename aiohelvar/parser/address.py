@@ -43,7 +43,7 @@ class HelvarAddress:
 
         var = int(var)
         if var < 0 or var > 253:
-            raise TypeError("Block must be between 1 and 4.")
+            raise TypeError("Block must be between 1 and 253.")
         self.__block = var
 
     @property
@@ -120,8 +120,8 @@ class SceneAddress:
 
     Address format is @g.b.c
 
-    g - Group (0-128)
-    b - Block (1-8)
+    g - Group (0-?)
+    b - Block (1-?)
     s - Scene (1-16)
 
     group 0 == Un-grouped
@@ -146,8 +146,8 @@ class SceneAddress:
     def group(self, var):
 
         var = int(var)
-        if var < 0 or var > 128:
-            raise TypeError("Group must be between 0 and 128.")
+        if var < 0 or var > 512:
+            raise TypeError("Group must be between 0 and 512.")
         self.__group = var
 
     @property
@@ -158,8 +158,8 @@ class SceneAddress:
     def block(self, var):
 
         var = int(var)
-        if var < 1 or var > 8:
-            raise TypeError("Block must be between 1 and 8.")
+        if var < 1 or var > 253:
+            raise TypeError("Block must be between 1 and 253.")
         self.__block = var
 
     @property
