@@ -10,6 +10,7 @@ class CommandType(Enum):
     QUERY_DEVICE_TYPES_AND_ADDRESSES = (100, "Query Device Types and Addresses")
     QUERY_DEVICE_STATE = (110, "Query Device State")
     QUERY_WORKGROUP_NAME = (107, "Query Workgroup Name")
+    QUERY_INPUTS = (151, "Query digital input(s) or state of a device")
     QUERY_DEVICE_LOAD_LEVEL = (152, "Query Device Load Level")
     QUERY_SCENE_INFO = (167, "Query device scene levels.")
     QUERY_ROUTER_TIME = (185, "Query Router Time")
