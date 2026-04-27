@@ -208,31 +208,31 @@ def test_scene_address_validation():
     
     # Valid ranges
     SceneAddress(0, 1, 1)  # group 0 is valid
-    SceneAddress(128, 8, 16)  # max values
-    
+    SceneAddress(65535, 253, 16)  # max values
+
     # Test invalid group values
     try:
         SceneAddress(-1, 1, 1)
         assert False, "Should raise error for negative group"
     except (TypeError, ValueError):
         pass
-    
+
     try:
-        SceneAddress(129, 1, 1)
-        assert False, "Should raise error for group > 128"
+        SceneAddress(65536, 1, 1)
+        assert False, "Should raise error for group > 65535"
     except (TypeError, ValueError):
         pass
-    
+
     # Test invalid block values
     try:
         SceneAddress(1, 0, 1)
         assert False, "Should raise error for block < 1"
     except (TypeError, ValueError):
         pass
-    
+
     try:
-        SceneAddress(1, 9, 1)
-        assert False, "Should raise error for block > 8"
+        SceneAddress(1, 254, 1)
+        assert False, "Should raise error for block > 253"
     except (TypeError, ValueError):
         pass
     
