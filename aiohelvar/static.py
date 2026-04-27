@@ -69,6 +69,7 @@ DIGIDIM_TYPES = {
     h_2_d(0x00, 0x17, 0x01): DigidimType("170", "IR Receiver", False),
     h_2_d(0x00, 0x31, 0x25): DigidimType("312", "Multisensor", False),
     h_2_d(0x00, 0x32, 0x00): DigidimType("320", "Occupancy Sensor", False),
+    h_2_d(0x00, 0x32, 0x17): DigidimType("321", "Multisensor", False), # Occupancy
     h_2_d(0x00, 0x41, 0x08): DigidimType("410", "Ballast Style 1-10V Converter", True),
     h_2_d(0x00, 0x41, 0x60): DigidimType("416S", "16A Dimmer", True),
     h_2_d(0x00, 0x42, 0x52): DigidimType("425S", "25A Dimmer", True),
