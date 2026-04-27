@@ -146,8 +146,8 @@ class SceneAddress:
     def group(self, var):
 
         var = int(var)
-        if var < 0 or var > 512:
-            raise TypeError("Group must be between 0 and 512.")
+        if var < 0 or var > 65535:
+            raise TypeError("Group must be between 0 and 65535.")
         self.__group = var
 
     @property

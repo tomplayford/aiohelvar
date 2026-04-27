@@ -93,7 +93,7 @@ async def get_scenes(router, groups):
     response = await router._send_command_task(Command(CommandType.QUERY_SCENE_NAMES))
 
     for group in groups.groups.values():
-        for block in range(1, 9):
+        for block in range(1, 254):
             for scene in range(1, 17):
                 scene = Scene(SceneAddress(int(group.group_id), int(block), int(scene)))
                 router.scenes.register_scene(scene.address, scene)
