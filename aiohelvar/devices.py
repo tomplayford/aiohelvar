@@ -1,5 +1,6 @@
 from aiohelvar.lib import Subscribable
 from aiohelvar.parser.parser import CommandParser
+from aiohelvar.router import Router
 from .static import (
     DALI_TYPES,
     DEVICE_STATE_FLAGS,
@@ -213,7 +214,7 @@ class Device(Subscribable):
 
 class Devices:
     devices: dict[HelvarAddress,Device]
-
+    router: Router
     def __init__(self, router):
         self.router = router
         self.devices = {}
@@ -306,8 +307,10 @@ class Devices:
     async def query_inputs(self, device: Device) -> list[bool] | None:
         """Send a QUERY_INPUTS command to the given address, 
             returns a variable list of booleans of input responses, 
-            or the raw response string if it contains unexpected characters,
-            or None if we don't get a response."""
+            throws aiohelvar.exceptions.PropertyDoesNotExistError
+            if the address doesn't support querying inputs.
+
+            Returns None if we don't get a response for some reason."""
         future = await self.router.send_command(
             Command(CommandType.QUERY_INPUTS, command_address=device.address),
             throw_error=True
@@ -331,13 +334,16 @@ class Devices:
                     CommandType.QUERY_DEVICE_DESCRIPTION, command_address=device.address
                 )
             )
-            await self.update_device_name(device.address, response.result)
+            if response:
+                await self.update_device_name(device.address, response.result)
 
         async def update_state(device):
             response = await self.router._send_command_task(
                 Command(CommandType.QUERY_DEVICE_STATE, command_address=device.address)
             )
-            await self.update_device_state(device.address, response.result)
+
+            if response:
+               await self.update_device_state(device.address, response.result)
 
         async def update_load_level(device):
             response = await self.router._send_command_task(
@@ -345,13 +351,15 @@ class Devices:
                     CommandType.QUERY_DEVICE_LOAD_LEVEL, command_address=device.address
                 )
             )
-            await self.update_device_load_level(device.address, response.result)
+            if response:
+                await self.update_device_load_level(device.address, response.result)
 
         async def update_scene_level(device):
             response = await self.router._send_command_task(
                 Command(CommandType.QUERY_SCENE_INFO, command_address=device.address)
             )
-            self.update_device_scene_level(device.address, response.result)
+            if response:
+                self.update_device_scene_level(device.address, response.result)
 
         asyncio.create_task(update_name(device))
         asyncio.create_task(update_state(device))
