@@ -10,13 +10,18 @@ WARNING: Polling happens every second for every device
 """
 
 import asyncio
+from datetime import datetime
 from aiohelvar.router import Router
 import logging
 
 from aiohelvar.parser.parser import CommandParser
 
 import aiohelvar.exceptions
-
+try:
+    from rich import print
+except ImportError:
+    pass
+POLL_INTERVAL = 2.0
 async def main():
     parser = CommandParser()
     router_ip_address = "10.254.1.1"
@@ -47,32 +52,51 @@ async def main():
         try:
             response = await router.devices.query_inputs(device)
             if response:
-                print("     - ",response)
+                print(f"     - {response}")
                 device_state[device] = response
             else:
-                print("     - ","(no response???)")
+                print("     - (no response???)")
         except aiohelvar.exceptions.PropertyDoesNotExistError:
-            print("     - ","N/A")
+            print("     - N/A")
 
     print(f"Found {len(device_state)} devices with queryable inputs. Starting polling...")
     printed_dots = False
+    loop = asyncio.get_running_loop()
     while True:
-        # print changes in state boolean field list
-        for device, state in device_state.items():
+        device_state_loop = list(device_state.items())
+        count = len(device_state_loop)
+
+        if count == 0:
+            print("No devices with queryable inputs.")
+            return
+
+        # Spread the queries evenly across one second
+        interval = POLL_INTERVAL / count
+        start_time = loop.time()
+
+        for i, (device, state) in enumerate(device_state_loop):
+
             try:
                 new_state = await router.devices.query_inputs(device)
                 if new_state != state:
                     if printed_dots:
-                        printed_dots=False
+                        printed_dots = False
                         print()
-                    print(f"Device {device.name} state changed: {state} -> {new_state}")
+                    print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Inputs changed for {device.name}: {new_state} (old {state})")
                     device_state[device] = new_state
             except aiohelvar.exceptions.PropertyDoesNotExistError:
-                print(f"Device {device.name} no longer has queryable inputs??")
-                del device_state[device]
-            await asyncio.sleep(0)
-        await asyncio.sleep(1)
-        printed_dots  = True
+                print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Device {device.name} no longer has queryable inputs??")
+                # remove from the live state dict if it's still present
+                device_state.pop(device, None)
+
+            # Calculate when the next task should start and adapt sleep
+            next_start = start_time + ((i + 1) * interval)
+            now = loop.time()
+            delay = next_start - now
+            if delay > 0:
+                await asyncio.sleep(delay)
+
+        printed_dots = True
         print(".", end="", flush=True)
 
 
