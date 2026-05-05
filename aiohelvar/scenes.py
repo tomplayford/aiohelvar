@@ -33,21 +33,26 @@ class Scenes:
         try:
             self.scenes[scene_address].name = name
         except KeyError:
+            scenes = list(self.scenes.keys())
+            if len(scenes) > 100:
+                scenes = len(scenes)
             _LOGGER.error(
                 f"Cannot update scene name: Scene not found {scene_address} "
                 f"(group={scene_address.group}, block={scene_address.block}, scene={scene_address.scene}). "
-                f"Available scenes: {list(self.scenes.keys())}"
+                f"Available scenes: {scenes}"
             )
 
     def get_scene(self, scene_address):
         try:
             return self.scenes[scene_address]
         except KeyError:
-            
+            sceneinfo = [(str(addr), hash(addr)) for addr in self.scenes.keys()]
+            if len(sceneinfo) > 100:
+                sceneinfo = len(sceneinfo)
             _LOGGER.error(
                 f"Scene not found: {scene_address} (group={scene_address.group}, "
                 f"block={scene_address.block}, scene={scene_address.scene}). "
-                f"Available scenes: {[(str(addr), hash(addr)) for addr in self.scenes.keys()]}"
+                f"Available scenes: {sceneinfo}"
             )
             return None
 
