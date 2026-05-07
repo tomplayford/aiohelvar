@@ -1,6 +1,5 @@
 from aiohelvar.lib import Subscribable
 from aiohelvar.parser.parser import CommandParser
-from aiohelvar.router import Router
 from .static import (
     DALI_TYPES,
     DEVICE_STATE_FLAGS,
@@ -214,7 +213,6 @@ class Device(Subscribable):
 
 class Devices:
     devices: dict[HelvarAddress,Device]
-    router: Router
     def __init__(self, router):
         self.router = router
         self.devices = {}
