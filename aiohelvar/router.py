@@ -9,7 +9,7 @@ from .parser.command_type import (
     MessageType,
 )
 from .parser.command import Command
-from .exceptions import CommandResponseTimeout, ParserError
+from .exceptions import CommandResponseTimeout, HelvarNetError, ParserError, helvarnet_error_by_result
 import asyncio
 import datetime
 import logging
@@ -72,7 +72,7 @@ class Router:
 
         self.commands_to_send = asyncio.Queue()
 
-        self.commands_received = []
+        self.commands_received: list[Command] = []
         self.command_received = asyncio.Condition()
 
         self.connected = False
@@ -253,7 +253,7 @@ class Router:
 
     #     print(response.result())
 
-    async def _send_command_task(self, command: Command):
+    async def _send_command_task(self, command: Command, throw_error=False) -> Command | None:
 
         start_time = datetime.datetime.now()
 
@@ -265,18 +265,41 @@ class Router:
             We match all command parameters, but we can't guarantee that identical requests don't steal
             eachothers replies."""
 
-            for r_command in self.commands_received:
-                if r_command.type_parameters_address == command.type_parameters_address:
+            for command_resp in self.commands_received:
+                if command_resp.type_parameters_address == command.type_parameters_address:
                     # this is probably our response.
                     # We can safely remove ourselves from list as we stop iterating.
+                    self.commands_received.remove(command_resp)
 
-                    if r_command.command_message_type == MessageType.ERROR:
-                        _LOGGER.error(
-                            f"Request command {command} triggered an error back from the router: {r_command}."
-                        )
+                    if command_resp.command_message_type == MessageType.ERROR:
+                        try:
+                            err = helvarnet_error_by_result(command_resp)
+                        except ValueError:
+                            err = None
 
-                    self.commands_received.remove(r_command)
-                    return r_command
+                        if throw_error:
+                            if err:
+                                
+                                _LOGGER.debug(
+                                    f"Request command {command} triggered an error back from the router: {err}."
+                                )
+
+                                raise err
+                            else:
+                                _LOGGER.error(
+                                    f"Request command {command} triggered an unknown error back from the router: {command_resp} (aiohelvar programming error?)."
+                                )
+                                err = HelvarNetError(error_id=-1)
+                                err.description = f"Unknown error with result {command_resp.result}"
+                                raise err
+
+                        else:
+                            _LOGGER.error(
+                                f"Request command {command} triggered an error back from the router: {err}."
+                            )
+                    
+                        
+                    return command_resp
             return None
 
         if command.command_type in COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE:
@@ -303,13 +326,13 @@ class Router:
 
         return response
 
-    async def send_command(self, command: Command) -> asyncio.Task:
+    async def send_command(self, command: Command, throw_error=False) -> asyncio.Task[Command|None]:
         """
         Send command, return a future that'll return when we get a response back.
         We don't have request identifiers, so we have to use basic FIFO and
         assume the router executes commands in the order it received them.
         """
-        return asyncio.create_task(self._send_command_task(command))
+        return asyncio.create_task(self._send_command_task(command, throw_error=throw_error))
 
     async def send_string(self, string: str):
         await self.commands_to_send.put(bytes(string, "utf-8"))

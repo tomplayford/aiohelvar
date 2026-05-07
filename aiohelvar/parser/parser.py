@@ -99,3 +99,14 @@ class CommandParser:
                     )
 
         return parameters
+    
+    @staticmethod
+    def _parse_query_inputs_response(response_string: str) -> list[bool]:
+        """Parse the response string of a QUERY_INPUTS command into a list of booleans.
+            First value in list is the least significant bit.
+            
+           NOTE: Does not know how many bits there should be!"""
+                
+        res = [bit == '1' for bit in bin(int(response_string))[2:]]
+        res.reverse()
+        return res
